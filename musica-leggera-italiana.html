@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Musica Italiana · Enciclopedia</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Josefin+Sans:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+:root {
+  --cream:#F0F6FA; --parchment:#DCE9F2; --parchment-l:#EAF3F8;
+  --burgundy:#1A6A8A; --burg-dark:#0D3D52; --burg-mid:#2A85A8;
+  --gold:#D4751A; --gold-l:#E8921F; --gold-pale:#F5C87A;
+  --green:#1A6A4A; --text:#0D2330; --text-l:#2E5A72; --text-ll:#6A96AA;
+  --white:#F8FCFE; --card-bg:#FAFCFF;
+  --shadow:rgba(13,61,82,0.12); --shadow-lg:rgba(13,61,82,0.20);
+  --border:rgba(26,106,138,0.22);
+}
+body.dark {
+  --cream:#0A1A22; --parchment:#102030; --parchment-l:#0E1C28;
+  --burgundy:#4AAACE; --burg-dark:#061018; --burg-mid:#2A85A8;
+  --gold:#E8921F; --gold-l:#F5A83A; --gold-pale:#7A4A10;
+  --green:#2A8A6A; --text:#D0E8F2; --text-l:#88B8CC; --text-ll:#4A7A90;
+  --white:#0C1820; --card-bg:#0E1E28;
+  --shadow:rgba(0,0,0,0.35); --shadow-lg:rgba(0,0,0,0.55);
+  --border:rgba(74,170,206,0.20);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Cormorant Garamond',Georgia,serif;background:var(--cream);color:var(--text);display:flex;font-size:16px;}
+#sidebar{width:76px;height:100vh;overflow-y:auto;flex-shrink:0;background:linear-gradient(180deg,var(--burg-dark) 0%,#3A0A0A 100%);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:3px;border-right:1px solid var(--gold);box-shadow:2px 0 16px rgba(0,0,0,.25);z-index:100;}
+#main{flex:1;height:100vh;overflow-y:auto;}
+
+/* Carta vergata sottile */
+body::before{content:'';position:fixed;inset:0;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(26,106,138,.04) 28px,rgba(26,106,138,.04) 29px);
+  pointer-events:none;z-index:9999;opacity:1;}
+
+/* SIDEBAR ─────────────────────────────────────────────── */
+#sidebar .logo{
+  font-family:'Playfair Display',serif;color:var(--gold-l);
+  font-size:18px;font-weight:900;font-style:italic;
+  writing-mode:vertical-rl;letter-spacing:4px;
+  margin-bottom:18px;padding:10px 0 16px;
+  border-bottom:1px solid rgba(160,120,32,.4);
+  width:100%;text-align:center;
+  text-shadow:0 1px 8px rgba(196,154,40,.3);
+}
+.nav-btn{
+  width:54px;height:54px;border-radius:6px;
+  border:1px solid transparent;background:transparent;
+  color:rgba(210,170,100,.7);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;transition:all .25s;
+  font-family:'Josefin Sans',sans-serif;font-size:7.5px;
+  letter-spacing:.8px;text-transform:uppercase;
+}
+.nav-btn:hover{
+  background:rgba(160,120,32,.12);
+  color:var(--gold-l);border-color:rgba(160,120,32,.4);
+}
+.nav-btn.active{
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold-l) 100%);
+  color:var(--burg-dark);border-color:var(--gold-l);
+  box-shadow:0 2px 10px rgba(160,120,32,.4);
+}
+.nav-btn .icon{font-size:19px;line-height:1;}
+
+/* MAIN ─────────────────────────────────────────────────── */
+#main::-webkit-scrollbar{width:4px;}
+#main::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;opacity:.6;}
+
+/* HEADER ───────────────────────────────────────────────── */
+#header{
+  background:linear-gradient(135deg,var(--burgundy) 0%,var(--burg-dark) 100%);
+  padding:14px 32px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--gold);
+  box-shadow:0 2px 20px rgba(0,0,0,.2);
+  flex-shrink:0;position:relative;overflow:hidden;
+}
+#header::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(160,120,32,.03) 8px,rgba(160,120,32,.03) 9px);
+}
+#header h1{
+  font-family:'Playfair Display',serif;font-size:1.45rem;
+  color:var(--gold-l);font-style:italic;letter-spacing:1.5px;
+  text-shadow:0 1px 12px rgba(196,154,40,.25);position:relative;
+}
+#header .sub{
+  font-family:'Josefin Sans',sans-serif;color:rgba(210,170,100,.65);
+  font-size:.65rem;letter-spacing:3.5px;text-transform:uppercase;margin-top:3px;position:relative;
+}
+.score-badge{
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold-l) 100%);
+  color:var(--burg-dark);font-family:'Josefin Sans',sans-serif;
+  font-weight:700;padding:7px 18px;border-radius:20px;
+  font-size:.78rem;letter-spacing:1.5px;white-space:nowrap;
+  box-shadow:0 2px 10px rgba(160,120,32,.35);position:relative;
+}
+
+/* PANELS ───────────────────────────────────────────────── */
+.panel{display:none;padding:30px 36px;animation:fadeIn .35s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.panel-title{
+  font-family:'Playfair Display',serif;font-size:1.75rem;
+  color:var(--burgundy);margin-bottom:4px;
+  display:flex;align-items:center;gap:12px;
+}
+.panel-title::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(to right,var(--gold),transparent);
+  margin-left:12px;opacity:.6;
+}
+.panel-sub{
+  font-family:'Josefin Sans',sans-serif;font-size:.68rem;
+  letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--text-ll);margin-bottom:26px;
+}
+
+/* OTD ──────────────────────────────────────────────────── */
+.otd-card{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:10px;padding:28px 32px;max-width:760px;
+  position:relative;box-shadow:3px 5px 20px var(--shadow),inset 0 1px 0 rgba(255,255,255,.8);
+}
+.otd-card::before{content:'♪';position:absolute;top:-13px;right:24px;font-size:24px;color:var(--gold);background:var(--cream);padding:0 8px;}
+.otd-date{font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+.otd-year{font-family:'Playfair Display',serif;font-size:2.6rem;color:var(--burgundy);font-weight:900;line-height:1;margin-bottom:8px;}
+.type-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-family:'Josefin Sans',sans-serif;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-bottom:12px;}
+.b-nascita{background:#E8F2E8;color:#1A4A1A;}
+.b-sanremo{background:#FEF0E0;color:#8A4010;}
+.b-canzone{background:#EEE8F6;color:#4A1A6A;}
+.b-evento{background:#F6E8E8;color:var(--burgundy);}
+.b-morte{background:#EBEBEB;color:#444;}
+.otd-desc{font-size:1.15rem;line-height:1.75;color:var(--text);margin-bottom:14px;font-weight:500;}
+.otd-detail{font-size:.92rem;color:var(--text-l);font-style:italic;line-height:1.65;border-left:2px solid var(--gold-pale);padding-left:14px;}
+.otd-mini{background:var(--card-bg);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:11px 18px;box-shadow:1px 2px 8px var(--shadow);margin-top:10px;}
+.otd-mini .yr{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--burgundy);font-weight:700;}
+.otd-none{text-align:center;padding:36px;color:var(--text-ll);font-style:italic;font-size:1.05rem;}
+
+/* QUIZ */
+.quiz-modes{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;}
+.mode-btn{padding:9px 20px;border:2px solid var(--parchment);border-radius:24px;background:var(--white);font-family:'Josefin Sans',sans-serif;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;color:var(--text-l);}
+.mode-btn:hover{border-color:var(--gold);color:var(--gold);}
+.mode-btn.active{background:var(--burgundy);color:var(--gold);border-color:var(--burgundy);}
+.quiz-card{background:var(--white);border:2px solid var(--parchment);border-radius:14px;padding:28px;max-width:660px;box-shadow:3px 5px 20px var(--shadow);}
+.quiz-prog{font-family:'Josefin Sans',sans-serif;font-size:.7rem;letter-spacing:2px;color:var(--text-l);margin-bottom:18px;text-transform:uppercase;}
+.quiz-q{font-family:'Playfair Display',serif;font-size:1.25rem;line-height:1.6;color:var(--text);margin-bottom:20px;}
+.quiz-hint{background:#FFF8EA;border:1px dashed var(--gold);border-radius:8px;padding:9px 14px;font-size:.93rem;color:var(--text-l);margin-bottom:7px;font-style:italic;}
+.hint-n{font-family:'Josefin Sans',sans-serif;font-weight:700;color:var(--gold);font-size:.72rem;letter-spacing:1px;font-style:normal;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;}
+.opt-btn{padding:13px 16px;border:2px solid var(--parchment);border-radius:10px;background:var(--white);font-family:'Crimson Text',serif;font-size:1rem;cursor:pointer;transition:all .2s;text-align:left;color:var(--text);}
+.opt-btn:hover:not(:disabled){border-color:var(--burgundy);background:#FBF3E8;}
+.opt-btn.correct{background:#E8F4E8;border-color:#2E8B2E;color:#1A5C1A;}
+.opt-btn.wrong{background:#F8E8E8;border-color:#C0392B;color:#7D1B1B;}
+.tf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;max-width:360px;}
+.tf-btn{padding:18px;border-radius:12px;border:2px solid var(--parchment);font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;cursor:pointer;transition:all .2s;background:var(--white);}
+.tf-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 4px 12px var(--shadow);}
+.tf-vero{color:var(--green);}
+.tf-falso{color:var(--burgundy);}
+.tf-btn.correct{background:#E8F4E8!important;border-color:#2E8B2E!important;}
+.tf-btn.wrong{background:#F8E8E8!important;border-color:#C0392B!important;}
+.yr-display{font-family:'Playfair Display',serif;font-size:3.2rem;color:var(--burgundy);font-weight:900;text-align:center;margin:10px 0;}
+input[type=range]{width:100%;accent-color:var(--burgundy);height:5px;cursor:pointer;}
+.qr{margin-top:18px;padding:14px;border-radius:10px;font-size:.97rem;line-height:1.6;}
+.qr-ok{background:#E8F4E8;border-left:4px solid #2E8B2E;}
+.qr-no{background:#F8EAEA;border-left:3px solid #B03030;}
+.qr-close{background:#FEF8E4;border-left:3px solid var(--gold);}
+.qr-exp{margin-top:6px;font-style:italic;color:var(--text-l);}
+.btn-p{padding:10px 26px;background:linear-gradient(135deg,var(--burgundy),var(--burg-mid));color:var(--gold-l);border:none;border-radius:20px;font-family:'Josefin Sans',sans-serif;font-size:.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .25s;margin-top:18px;box-shadow:0 2px 10px rgba(107,23,23,.25);}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(107,23,23,.35);}
+.btn-s{padding:8px 20px;background:transparent;color:var(--burgundy);border:1px solid var(--border);border-radius:20px;font-family:'Josefin Sans',sans-serif;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-top:12px;margin-left:8px;}
+.btn-s:hover{background:var(--burgundy);color:var(--gold-l);}
+.stats-row{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;}
+.stat-box{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 18px;text-align:center;box-shadow:1px 2px 8px var(--shadow);min-width:100px;}
+.stat-n{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--burgundy);font-weight:900;line-height:1;}
+.stat-l{font-family:'Josefin Sans',sans-serif;font-size:.64rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-ll);margin-top:3px;}
+
+/* CURIOSITA */
+.filt-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px;}
+.filt-btn{padding:5px 14px;border:1px solid var(--border);border-radius:20px;background:var(--card-bg);font-family:'Josefin Sans',sans-serif;font-size:.67rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;color:var(--text-ll);}
+.filt-btn:hover{border-color:var(--gold);}
+.filt-btn.active{background:var(--gold);color:#fff;border-color:var(--gold);}
+.c-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:15px;}
+.c-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:17px 20px;box-shadow:1px 2px 10px var(--shadow);transition:transform .2s,box-shadow .2s;}
+.c-card:hover{transform:translateY(-2px);box-shadow:3px 5px 16px var(--shadow-lg);border-color:var(--gold);}
+.c-artist{font-family:'Playfair Display',serif;font-weight:700;color:var(--burgundy);font-size:.96rem;margin-bottom:3px;}
+.c-decade{font-family:'Josefin Sans',sans-serif;font-size:.64rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.c-text{font-size:.92rem;line-height:1.68;color:var(--text);}
+.c-tag{display:inline-block;padding:2px 9px;background:var(--parchment-l);border-radius:10px;font-size:.63rem;font-family:'Josefin Sans',sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--text-ll);margin-top:9px;}
+.srch-wrap{max-width:380px;position:relative;margin-bottom:18px;}
+.srch-in{width:100%;padding:10px 16px 10px 38px;border:1px solid var(--border);border-radius:20px;background:var(--card-bg);font-family:'Cormorant Garamond',serif;font-size:.97rem;color:var(--text);outline:none;transition:border-color .2s;box-shadow:inset 0 1px 4px rgba(0,0,0,.06);}
+.srch-in:focus{border-color:var(--gold);}
+.srch-ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-ll);font-size:15px;pointer-events:none;}
+
+/* MAP */
+#collabSvg{width:100%;height:540px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;box-shadow:2px 4px 16px var(--shadow);}
+.cleg{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap;}
+.cleg-item{display:flex;align-items:center;gap:6px;font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:1px;color:var(--text-ll);}
+.cleg-line{width:26px;height:2px;border-radius:2px;}
+#c-tip{position:fixed;background:var(--burg-dark);color:var(--gold-l);padding:9px 14px;border-radius:8px;font-family:'Josefin Sans',sans-serif;font-size:.72rem;pointer-events:none;opacity:0;transition:opacity .2s;z-index:1000;max-width:220px;line-height:1.5;}
+
+/* ACCORDI */
+.accordi-search{display:flex;gap:10px;margin-bottom:24px;max-width:520px;flex-wrap:wrap;}
+.accordi-input{flex:1;padding:10px 16px;border:1px solid var(--border);border-radius:20px;background:var(--card-bg);font-family:'Cormorant Garamond',serif;font-size:.97rem;color:var(--text);outline:none;min-width:200px;}
+.accordi-input:focus{border-color:var(--gold);}
+.accordi-btn{padding:10px 22px;background:var(--burgundy);color:var(--gold-l);border:none;border-radius:20px;font-family:'Josefin Sans',sans-serif;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.accordi-btn:hover{background:var(--burg-mid);}
+.accordi-suggeriti{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.accordi-sug{padding:5px 14px;border:1px solid var(--border);border-radius:20px;background:var(--card-bg);font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;color:var(--text-ll);}
+.accordi-sug:hover{border-color:var(--gold);color:var(--gold);}
+.accordi-note{background:var(--parchment-l);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:22px;font-size:.88rem;color:var(--text-l);line-height:1.6;}
+.accordi-link-box{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:28px 32px;max-width:560px;box-shadow:2px 4px 16px var(--shadow);text-align:center;}
+.accordi-link-title{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--burgundy);margin-bottom:8px;}
+.accordi-link-sub{font-size:.9rem;color:var(--text-l);margin-bottom:20px;line-height:1.6;}
+.accordi-link-btn{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;background:var(--burgundy);color:var(--gold-l);border-radius:24px;text-decoration:none;font-family:'Josefin Sans',sans-serif;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;transition:all .25s;box-shadow:0 2px 10px var(--shadow);}
+.accordi-link-btn:hover{transform:translateY(-2px);box-shadow:0 4px 16px var(--shadow-lg);}
+.accordi-artisti{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:22px;}
+.accordi-artista-btn{padding:9px 14px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;font-family:'Cormorant Garamond',serif;font-size:.92rem;color:var(--text);cursor:pointer;transition:all .2s;text-align:left;}
+.accordi-artista-btn:hover{border-color:var(--gold);background:var(--parchment-l);}
+
+/* SANREMO */
+.sanremo-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.sanremo-decade{padding:6px 16px;border:1px solid var(--border);border-radius:20px;background:var(--card-bg);font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;color:var(--text-ll);}
+.sanremo-decade:hover{border-color:var(--gold);color:var(--gold);}
+.sanremo-decade.active{background:var(--burgundy);color:var(--gold-l);border-color:var(--burgundy);}
+.sanremo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+.sanremo-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:18px 20px;box-shadow:1px 2px 8px var(--shadow);transition:transform .2s;}
+.sanremo-card:hover{transform:translateY(-2px);box-shadow:2px 4px 14px var(--shadow-lg);border-color:var(--gold);}
+.sanremo-anno{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--burgundy);font-weight:900;line-height:1;margin-bottom:4px;}
+.sanremo-canzone{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);font-style:italic;margin-bottom:2px;}
+.sanremo-vincitore{font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.sanremo-curiosita{font-size:.88rem;line-height:1.6;color:var(--text-l);border-left:2px solid var(--gold-pale);padding-left:10px;font-style:italic;}
+
+/* ACCORDI TABS */
+.accordi-tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:2px solid var(--border);}
+.accordi-tab{padding:10px 24px;border:none;background:transparent;font-family:'Josefin Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;color:var(--text-ll);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.accordi-tab:hover{color:var(--burgundy);}
+.accordi-tab.active{color:var(--burgundy);border-bottom-color:var(--burgundy);font-weight:700;}
+
+/* GENRE TREE */
+#genreSvg{width:100%;height:580px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;box-shadow:2px 4px 16px var(--shadow);}
+
+/* RADIO ─────────────────────────────────────────────────── */
+.radio-filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:22px;}
+.radio-filt{padding:6px 16px;border:1px solid var(--border);border-radius:20px;background:var(--card-bg);font-family:'Josefin Sans',sans-serif;font-size:.67rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;color:var(--text-ll);}
+.radio-filt:hover{border-color:var(--gold);color:var(--gold);}
+.radio-filt.active{background:var(--burgundy);color:var(--gold-l);border-color:var(--burgundy);}
+.radio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:80px;}
+.radio-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:13px;cursor:pointer;transition:all .22s;box-shadow:1px 2px 8px var(--shadow);}
+.radio-card:hover{transform:translateY(-2px);box-shadow:2px 4px 14px var(--shadow-lg);border-color:var(--gold);}
+.radio-card.playing{border-color:var(--burgundy);background:linear-gradient(135deg,#FEF8F0,#FDF4E8);box-shadow:0 0 0 2px rgba(107,23,23,.12),2px 4px 14px var(--shadow-lg);}
+.radio-logo{width:48px;height:48px;border-radius:7px;object-fit:contain;background:var(--parchment);flex-shrink:0;padding:4px;}
+.radio-logo-ph{width:48px;height:48px;border-radius:7px;background:linear-gradient(135deg,var(--burgundy),var(--burg-dark));display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;color:var(--gold-l);}
+.radio-info{flex:1;min-width:0;}
+.radio-name{font-family:'Playfair Display',serif;font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.radio-genre{font-family:'Josefin Sans',sans-serif;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:3px;}
+.radio-play-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;flex-shrink:0;color:var(--burgundy);}
+.radio-play-btn:hover,.radio-play-btn.active{background:var(--burgundy);color:var(--gold-l);border-color:var(--burgundy);}
+.radio-status{padding:36px;text-align:center;color:var(--text-ll);font-style:italic;}
+
+/* PLAYER BAR ────────────────────────────────────────────── */
+#radioPlayerBar{
+  position:fixed;bottom:0;left:76px;right:0;
+  background:linear-gradient(135deg,var(--burg-dark) 0%,#3A0808 100%);
+  border-top:1px solid rgba(160,120,32,.5);
+  padding:10px 24px;
+  display:none;align-items:center;gap:16px;
+  z-index:500;box-shadow:0 -4px 20px rgba(0,0,0,.3);
+}
+#radioPlayerBar.visible{display:flex;}
+#rp-logo{width:38px;height:38px;border-radius:6px;object-fit:contain;background:var(--parchment-l);padding:3px;flex-shrink:0;}
+#rp-logo-ph{width:38px;height:38px;border-radius:6px;background:var(--burg-mid);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--gold-l);flex-shrink:0;}
+.rp-info{flex:1;min-width:0;}
+.rp-name{font-family:'Playfair Display',serif;font-size:.9rem;color:var(--gold-l);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rp-status{font-family:'Josefin Sans',sans-serif;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:rgba(210,170,100,.55);}
+.rp-pulse{display:inline-flex;gap:2px;align-items:flex-end;height:12px;margin-right:5px;vertical-align:middle;}
+.rp-pulse span{width:3px;background:var(--gold-l);border-radius:2px;animation:pulse .8s ease-in-out infinite;}
+.rp-pulse span:nth-child(2){animation-delay:.15s;}
+.rp-pulse span:nth-child(3){animation-delay:.3s;}
+@keyframes pulse{0%,100%{height:3px}50%{height:12px}}
+#rp-stop{padding:7px 18px;background:transparent;color:var(--gold-l);border:1px solid rgba(160,120,32,.35);border-radius:14px;font-family:'Josefin Sans',sans-serif;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;flex-shrink:0;}
+#rp-stop:hover{background:rgba(160,120,32,.15);}
+#rp-vol{accent-color:var(--gold);width:80px;cursor:pointer;flex-shrink:0;}
+
+/* DARK MODE TOGGLE & TOPBAR ─────────────────────────────── */
+#topbar{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--cream);border-bottom:1px solid var(--border);flex-shrink:0;}
+.topbar-srch{position:relative;flex:1;max-width:500px;}
+.topbar-srch .srch-ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-ll);font-size:14px;pointer-events:none;}
+#globalSearch{width:100%;padding:8px 14px 8px 34px;border:1px solid var(--border);border-radius:20px;background:var(--card-bg);font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s;}
+#globalSearch:focus{border-color:var(--gold);}
+#darkToggle{padding:6px 14px;border:1px solid var(--border);border-radius:16px;background:var(--card-bg);color:var(--text-ll);font-size:.75rem;cursor:pointer;font-family:'Josefin Sans',sans-serif;letter-spacing:1px;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+#darkToggle:hover{border-color:var(--gold);color:var(--gold);}
+#searchResults{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;box-shadow:2px 4px 16px var(--shadow-lg);position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:380px;overflow-y:auto;z-index:200;display:none;}
+#searchResults.visible{display:block;}
+.sr-group{padding:7px 14px 3px;font-family:'Josefin Sans',sans-serif;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);background:var(--parchment-l);}
+.sr-item{padding:9px 16px;cursor:pointer;border-bottom:1px solid rgba(160,120,32,.08);transition:background .15s;display:flex;flex-direction:column;gap:2px;}
+.sr-item:hover{background:var(--parchment-l);}
+.sr-item .sr-title{font-family:'Playfair Display',serif;color:var(--burgundy);font-size:.95rem;}
+.sr-item .sr-sub{font-size:.78rem;color:var(--text-l);}
+.sr-none{padding:16px;text-align:center;color:var(--text-ll);font-style:italic;font-size:.9rem;}
+#menuToggle{display:none;background:none;border:none;font-size:22px;cursor:pointer;color:var(--gold-l);padding:4px 8px;flex-shrink:0;}
+
+/* MOBILE ─────────────────────────────────────────────────── */
+@media (max-width:768px) {
+  #menuToggle{display:block;}
+  #sidebar{position:fixed;left:-82px;top:0;height:100vh;transition:left .25s ease;z-index:200;}
+  #sidebar.open{left:0;}
+  .panel{padding:18px 14px;}
+  #header h1{font-size:1.1rem;}
+  #header .sub{display:none;}
+  .c-grid,.art-grid,.news-grid,.radio-grid{grid-template-columns:1fr;}
+  .opts,.tf-grid{grid-template-columns:1fr;}
+  #radioPlayerBar{left:0;}
+  .art-modal-box{margin:8px;max-height:92vh;}
+  .disc-full{grid-template-columns:1fr 1fr;}
+  .stats-row{gap:8px;}
+  .stat-box{min-width:80px;padding:10px 12px;}
+}
+
+/* SPOTIFY PLAYER */
+.sp-tracks{margin-top:12px;}
+.sp-track{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--parchment);font-size:.88rem;}
+.sp-track:last-child{border:none;}
+.sp-cover{width:36px;height:36px;border-radius:4px;object-fit:cover;background:var(--parchment);flex-shrink:0;}
+.sp-cover-ph{width:36px;height:36px;border-radius:4px;background:var(--burgundy);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:14px;flex-shrink:0;}
+.sp-info{flex:1;min-width:0;}
+.sp-title{font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sp-album{font-size:.75rem;color:var(--text-l);}
+.sp-play{width:30px;height:30px;border-radius:50%;border:none;background:var(--burgundy);color:var(--gold);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;}
+.sp-play:hover{background:var(--burg-dark);}
+.sp-play.playing{background:var(--gold);color:var(--burg-dark);}
+.sp-no-preview{font-size:.7rem;color:var(--text-l);font-style:italic;}
+.sp-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:#1DB954;color:white;border-radius:10px;font-family:'Josefin Sans',sans-serif;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;font-weight:700;}
+
+/* QUIZ AUDIO */
+.audio-player-wrap{background:#1a1a2e;border-radius:12px;padding:20px;margin:16px 0;text-align:center;}
+.audio-controls{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;}
+.audio-play-btn{width:52px;height:52px;border-radius:50%;border:none;background:#1DB954;color:white;font-size:20px;cursor:pointer;transition:transform .15s;}
+.audio-play-btn:hover{transform:scale(1.08);}
+.audio-label{font-family:'Josefin Sans',sans-serif;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:#aaa;}
+.audio-cover{width:80px;height:80px;border-radius:8px;object-fit:cover;margin:0 auto;display:block;}
+
+/* NOTIZIE */
+.news-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:20px;}
+.news-query-btn{padding:8px 18px;border:2px solid var(--parchment);border-radius:20px;background:var(--white);font-family:'Josefin Sans',sans-serif;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;color:var(--text-l);}
+.news-query-btn:hover{border-color:var(--gold);color:var(--gold);}
+.news-query-btn.active{background:var(--burgundy);color:var(--gold);border-color:var(--burgundy);}
+.news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;}
+.news-card{background:var(--white);border:1.5px solid var(--parchment);border-radius:12px;overflow:hidden;box-shadow:2px 3px 14px var(--shadow);transition:transform .2s,box-shadow .2s;text-decoration:none;color:inherit;display:flex;flex-direction:column;}
+.news-card:hover{transform:translateY(-3px);box-shadow:4px 6px 20px var(--shadow);border-color:var(--gold);}
+.news-img{width:100%;height:160px;object-fit:cover;background:var(--parchment);}
+.news-img-ph{width:100%;height:100px;background:linear-gradient(135deg,var(--burgundy),var(--burg-dark));display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:var(--gold);}
+.news-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:6px;}
+.news-source{font-family:'Josefin Sans',sans-serif;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);}
+.news-title{font-family:'Playfair Display',serif;font-size:1rem;line-height:1.45;color:var(--text);font-weight:700;}
+.news-desc{font-size:.88rem;line-height:1.55;color:var(--text-l);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.news-date{font-family:'Josefin Sans',sans-serif;font-size:.65rem;letter-spacing:1px;color:var(--text-l);margin-top:auto;padding-top:8px;}
+.news-status{padding:40px;text-align:center;color:var(--text-l);font-style:italic;font-size:1rem;}
+.news-offline{background:#FFF8EA;border:1px dashed var(--gold);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:.9rem;color:var(--text-l);}
+.news-offline strong{color:var(--burgundy);}
+
+/* ARTISTI */
+.art-search-wrap{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:20px;}
+.art-filt-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+.art-card{background:var(--white);border:1.5px solid var(--parchment);border-radius:14px;overflow:hidden;box-shadow:2px 4px 16px var(--shadow);transition:transform .2s,box-shadow .2s;cursor:pointer;}
+.art-card:hover{transform:translateY(-4px);box-shadow:4px 8px 24px var(--shadow);border-color:var(--gold);}
+.art-card-top{display:flex;gap:0;height:110px;}
+.art-foto{width:90px;height:110px;object-fit:cover;object-position:top;flex-shrink:0;background:var(--parchment);}
+.art-foto-placeholder{width:90px;height:110px;flex-shrink:0;background:linear-gradient(135deg,var(--burgundy),var(--burg-dark));display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--gold);}
+.art-card-info{padding:12px 14px;flex:1;display:flex;flex-direction:column;justify-content:center;}
+.art-card-name{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;color:var(--burgundy);margin-bottom:3px;}
+.art-card-cat{font-family:'Josefin Sans',sans-serif;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.art-card-decades{display:flex;gap:4px;flex-wrap:wrap;}
+.art-decade-tag{padding:2px 7px;background:#F0E8E0;border-radius:10px;font-family:'Josefin Sans',sans-serif;font-size:.62rem;letter-spacing:1px;color:var(--text-l);}
+.art-card-body{padding:12px 14px;border-top:1px solid var(--parchment);}
+.art-bio{font-size:.9rem;line-height:1.6;color:var(--text-l);margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.art-genres{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.art-genre-tag{padding:2px 8px;background:#EAF0F8;border-radius:10px;font-family:'Josefin Sans',sans-serif;font-size:.62rem;letter-spacing:.5px;color:#1A3A6A;}
+.art-disc-title{font-family:'Josefin Sans',sans-serif;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.art-disc-list{list-style:none;display:flex;flex-direction:column;gap:3px;}
+.art-disc-item{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:var(--text);padding:3px 0;border-bottom:1px dashed var(--parchment);}
+.art-disc-item:last-child{border:none;}
+.art-disc-year{font-family:'Josefin Sans',sans-serif;font-size:.7rem;color:var(--gold);font-weight:600;}
+.art-disc-tipo{font-size:.68rem;color:var(--text-l);font-style:italic;}
+.art-no-disc{font-size:.85rem;color:var(--text-l);font-style:italic;}
+
+/* MODAL ARTISTA */
+#artModal{display:none;position:fixed;inset:0;background:rgba(42,21,8,.65);z-index:2000;align-items:center;justify-content:center;padding:20px;}
+#artModal.open{display:flex;}
+.art-modal-box{background:var(--white);border:2px solid var(--gold);border-radius:16px;max-width:680px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.art-modal-header{display:flex;gap:0;position:sticky;top:0;z-index:10;background:var(--white);border-bottom:2px solid var(--parchment);}
+.art-modal-foto{width:120px;height:150px;object-fit:cover;object-position:top;flex-shrink:0;}
+.art-modal-foto-ph{width:120px;height:150px;flex-shrink:0;background:linear-gradient(135deg,var(--burgundy),var(--burg-dark));display:flex;align-items:center;justify-content:center;font-size:3rem;color:var(--gold);}
+.art-modal-hinfo{padding:18px 20px;flex:1;}
+.art-modal-name{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--burgundy);font-weight:700;margin-bottom:4px;}
+.art-modal-cat{font-family:'Josefin Sans',sans-serif;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);}
+.art-modal-close{position:absolute;top:10px;right:14px;font-size:22px;cursor:pointer;color:var(--text-l);background:none;border:none;line-height:1;}
+.art-modal-body{padding:20px 24px;}
+.art-modal-section{margin-bottom:18px;}
+.art-modal-section-title{font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--parchment);}
+.art-modal-bio{font-size:.97rem;line-height:1.7;color:var(--text);}
+.disc-full{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;}
+.disc-item-full{background:#FAF5EC;border:1px solid var(--parchment);border-radius:8px;padding:8px 12px;}
+.disc-item-full .dy{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--burgundy);font-weight:700;}
+.disc-item-full .dt{font-size:.88rem;color:var(--text);margin-top:1px;}
+.disc-item-full .dtp{font-size:.68rem;color:var(--text-l);font-family:'Josefin Sans',sans-serif;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+/* DARK MODE TOGGLE */
+#darkToggle{position:absolute;right:60px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;color:var(--gold-l);font-size:16px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:10;}
+#darkToggle:hover{background:rgba(255,255,255,.2);}
+
+/* GLOBAL SEARCH */
+#globalSearch{display:flex;align-items:center;gap:10px;padding:10px 20px;background:var(--parchment-l);border-bottom:1px solid var(--border);flex-shrink:0;}
+#globalSearchWrap{position:relative;flex:1;max-width:500px;}
+#globalSearchIn{width:100%;padding:9px 16px 9px 36px;border:1px solid var(--border);border-radius:20px;background:var(--card-bg);font-family:'Cormorant Garamond',serif;font-size:.97rem;color:var(--text);outline:none;transition:border-color .2s;}
+#globalSearchIn:focus{border-color:var(--gold);}
+#globalSearchWrap .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-ll);font-size:15px;pointer-events:none;}
+#searchResults{padding:16px 32px;display:none;}
+#searchResults.active{display:block;}
+.sr-section{margin-bottom:20px;}
+.sr-section-title{font-family:'Josefin Sans',sans-serif;font-size:.65rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.sr-item{padding:10px 14px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .2s;}
+.sr-item:hover{border-color:var(--gold);transform:translateX(4px);}
+.sr-item strong{color:var(--burgundy);font-family:'Playfair Display',serif;}
+.sr-item em{color:var(--text-ll);font-size:.88rem;font-style:normal;}
+.sr-none{color:var(--text-ll);font-style:italic;padding:20px;text-align:center;}
+
+/* TESTI */
+.testi-search{max-width:480px;display:flex;gap:10px;margin-bottom:24px;align-items:center;}
+.testi-input{flex:1;padding:10px 16px;border:1px solid var(--border);border-radius:20px;background:var(--card-bg);font-family:'Cormorant Garamond',serif;font-size:.97rem;color:var(--text);outline:none;}
+.testi-input:focus{border-color:var(--gold);}
+.testi-btn{padding:10px 20px;background:var(--burgundy);color:var(--gold-l);border:none;border-radius:20px;font-family:'Josefin Sans',sans-serif;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.testi-btn:hover{background:var(--burg-mid);}
+.testi-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:20px;}
+.testi-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:16px 18px;cursor:pointer;transition:all .2s;box-shadow:1px 2px 8px var(--shadow);}
+.testi-card:hover{border-color:var(--gold);transform:translateY(-2px);}
+.testi-card-title{font-family:'Playfair Display',serif;font-size:.98rem;color:var(--burgundy);font-weight:700;margin-bottom:3px;}
+.testi-card-artist{font-family:'Josefin Sans',sans-serif;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);}
+.testi-box{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:28px 32px;max-width:680px;box-shadow:2px 4px 16px var(--shadow);}
+.testi-box-title{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--burgundy);font-weight:700;margin-bottom:4px;}
+.testi-box-artist{font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:18px;}
+.testi-testo{font-size:1rem;line-height:2;color:var(--text);white-space:pre-wrap;font-family:'Cormorant Garamond',serif;}
+.testi-back{font-family:'Josefin Sans',sans-serif;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-ll);cursor:pointer;margin-bottom:20px;display:inline-flex;align-items:center;gap:6px;border:none;background:none;padding:0;}
+.testi-back:hover{color:var(--gold);}
+.testi-status{padding:30px;text-align:center;color:var(--text-ll);font-style:italic;}
+.testi-copyright{font-size:.75rem;color:var(--text-ll);font-style:italic;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);}
+
+/* MOBILE */
+#menuToggle{display:none;position:fixed;top:10px;left:10px;z-index:200;background:var(--burgundy);color:var(--gold-l);border:none;border-radius:8px;width:40px;height:40px;font-size:18px;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+#sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:98;}
+
+@media(max-width:768px){
+  #menuToggle{display:flex;}
+  #sidebar{position:fixed;left:-82px;top:0;height:100vh;z-index:99;transition:left .25s;}
+  #sidebar.open{left:0;}
+  #sidebarOverlay.open{display:block;}
+  #header{padding:10px 14px 10px 60px;}
+  #header h1{font-size:1.1rem;}
+  #header .sub{display:none;}
+  .panel{padding:14px 12px;}
+  .panel-title{font-size:1.35rem;}
+  .art-grid,.c-grid,.radio-grid,.news-grid,.testi-results{grid-template-columns:1fr;}
+  .opts{grid-template-columns:1fr;}
+  .tf-grid{max-width:100%;}
+  .otd-card{padding:16px 14px;}
+  .quiz-card{padding:16px 14px;}
+  .testi-search{flex-direction:column;}
+  .testi-input,.testi-btn{width:100%;}
+  #radioPlayerBar{left:0;}
+}
+</style>
+</head>
+<body>
+
+<button id="menuToggle" onclick="toggleSidebar()">☰</button>
+<div id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<nav id="sidebar">
+  <div class="logo">MI</div>
+  <button class="nav-btn active" onclick="showPanel('otd',this)" title="Accadde Oggi"><span class="icon">📅</span><span>Oggi</span></button>
+  <button class="nav-btn" onclick="showPanel('artisti',this)" title="Schede Artisti"><span class="icon">🎤</span><span>Artisti</span></button>
+  <button class="nav-btn" onclick="showPanel('cur',this)" title="Curiosità"><span class="icon">💡</span><span>Storie</span></button>
+  <button class="nav-btn" onclick="showPanel('sanremo',this)" title="Sanremo"><span class="icon">🌹</span><span>Sanremo</span></button>
+  <button class="nav-btn" onclick="showPanel('testi',this)" title="Testi"><span class="icon">📝</span><span>Testi</span></button>
+  <button class="nav-btn" onclick="showPanel('news',this)" title="Notizie"><span class="icon">📰</span><span>News</span></button>
+  <button class="nav-btn" onclick="showPanel('radio',this)" title="Radio"><span class="icon">📻</span><span>Radio</span></button>
+  <button class="nav-btn" onclick="showPanel('map',this)" title="Mappa Collaborazioni"><span class="icon">🕸️</span><span>Mappa</span></button>
+  <button class="nav-btn" onclick="showPanel('gen',this)" title="Albero Generi"><span class="icon">🌳</span><span>Generi</span></button>
+  <button class="nav-btn" onclick="showPanel('quiz',this)" title="Quiz"><span class="icon">🎮</span><span>Quiz</span></button>
+  <button class="nav-btn" onclick="showPanel('accordi',this)" title="Accordi"><span class="icon">🎸</span><span>Accordi</span></button>
+</nav>
+
+<div id="main" style="flex:1;height:100vh;overflow-y:auto;overflow-x:hidden;">
+  <header id="header" style="position:relative;">
+    <div>
+      <h1>Musica Italiana</h1>
+      <div class="sub">Enciclopedia Interattiva · dal 1920 ad oggi</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="darkToggle" onclick="toggleDark()" title="Dark mode">🌙</button>
+      <div class="score-badge" id="scoreBadge">⭐ 0 punti</div>
+    </div>
+  </header>
+  <div id="globalSearch">
+    <div id="globalSearchWrap">
+      <span class="si">🔍</span>
+      <input id="globalSearchIn" placeholder="Cerca in tutto: artisti, canzoni, curiosità, eventi…" oninput="globalSearch(this.value)">
+    </div>
+  </div>
+  <div id="searchResults"></div>
+
+  <!-- ON THIS DAY -->
+  <section class="panel active" id="panel-otd">
+    <div class="panel-title">📅 Accadde Oggi</div>
+    <div class="panel-sub" id="todayLbl">Nella musica italiana</div>
+    <div id="otdOut"></div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="panel" id="panel-quiz">
+    <div class="panel-title">🎮 Quiz</div>
+    <div class="panel-sub">Metti alla prova le tue conoscenze</div>
+    <div class="quiz-modes">
+      <button class="mode-btn active" onclick="setMode('ind',this)">🕵️ Indovina l'Artista</button>
+      <button class="mode-btn" onclick="setMode('tf',this)">⚖️ Vero o Falso</button>
+      <button class="mode-btn" onclick="setMode('yr',this)">📅 Che Anno È?</button>
+    </div>
+    <div id="quizOut"></div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-n" id="sC">0</div><div class="stat-l">Corrette</div></div>
+      <div class="stat-box"><div class="stat-n" id="sW">0</div><div class="stat-l">Sbagliate</div></div>
+      <div class="stat-box"><div class="stat-n" id="sS">0</div><div class="stat-l">Streak 🔥</div></div>
+    </div>
+  </section>
+
+  <!-- CURIOSITA -->
+  <section class="panel" id="panel-cur">
+    <div class="panel-title">💡 Storie & Curiosità</div>
+    <div class="panel-sub">Aneddoti e fatti sorprendenti</div>
+    <div class="srch-wrap"><span class="srch-ic">🔍</span><input class="srch-in" id="srchIn" placeholder="Cerca artista o parola chiave…" oninput="drawCuriosity()"></div>
+    <div class="c-grid" id="curGrid"></div>
+  </section>
+
+  <!-- TESTI -->
+  <section class="panel" id="panel-testi">
+    <div class="panel-title">📝 Testi delle Canzoni</div>
+    <div class="panel-sub">Cerca i testi · powered by Genius</div>
+    <div class="testi-search">
+      <input class="testi-input" id="testiQ" placeholder="Es: Volare, Azzurro, Caruso…" onkeydown="if(event.key==='Enter')cercaTesto()">
+      <button class="testi-btn" onclick="cercaTesto()">🔍 Cerca</button>
+    </div>
+    <div id="testiOut"></div>
+  </section>
+
+  <!-- RADIO -->
+  <section class="panel" id="panel-radio">
+    <div class="panel-title">📻 Radio</div>
+    <div class="panel-sub">Stazioni italiane in diretta · richiede internet</div>
+    <div class="radio-filters" id="radioFilters"></div>
+    <div id="radioGrid" class="radio-grid">
+      <div class="radio-status">Caricamento stazioni…</div>
+    </div>
+  </section>
+
+  <!-- PLAYER BAR RADIO -->
+  <div id="radioPlayerBar">
+    <div id="rp-logo-ph">📻</div>
+    <div class="rp-info">
+      <div class="rp-name" id="rpName">—</div>
+      <div class="rp-status">
+        <span class="rp-pulse"><span></span><span></span><span></span></span>
+        in onda
+      </div>
+    </div>
+    <input type="range" id="rp-vol" min="0" max="1" step="0.05" value="0.8" oninput="setRadioVol(this.value)">
+    <button id="rp-stop" onclick="stopRadio()">⏹ Stop</button>
+  </div>
+
+  <!-- NOTIZIE -->
+  <section class="panel" id="panel-news">
+    <div class="panel-title">📰 Notizie</div>
+    <div class="panel-sub">Musica italiana · aggiornate in tempo reale</div>
+    <div id="newsOfflineBanner"></div>
+    <div id="newsGrid" class="news-grid"></div>
+  </section>
+
+  <!-- ARTISTI -->
+  <section class="panel" id="panel-artisti">
+    <div class="panel-title">🎤 Schede Artisti</div>
+    <div class="panel-sub">Biografie, discografie e curiosità · dati da Wikipedia & MusicBrainz</div>
+    <div class="art-search-wrap">
+      <div class="srch-wrap" style="margin-bottom:0"><span class="srch-ic">🔍</span><input class="srch-in" id="artSrch" placeholder="Cerca artista…" oninput="drawArtisti()"></div>
+    </div>
+    <div class="art-filt-row" id="artFiltRow"></div>
+    <div class="art-grid" id="artGrid"></div>
+  </section>
+
+  <!-- MODAL ARTISTA -->
+  <div id="artModal" onclick="closeModal(event)">
+    <div class="art-modal-box" id="artModalBox"></div>
+  </div>
+
+  <!-- MAPPA -->
+  <section class="panel" id="panel-map">
+    <div class="panel-title">🕸️ Mappa delle Collaborazioni</div>
+    <div class="panel-sub">Connessioni tra artisti · trascina i nodi · passa il mouse per i dettagli</div>
+    <svg id="collabSvg"></svg>
+    <div class="cleg">
+      <div class="cleg-item"><div class="cleg-line" style="background:#7D1B1B"></div>Ha scritto per</div>
+      <div class="cleg-item"><div class="cleg-line" style="background:#B8860B"></div>Duetto / Tour insieme</div>
+      <div class="cleg-item"><div class="cleg-line" style="background:#1E3A1E;border-style:dashed"></div>Stessa scena / etichetta</div>
+    </div>
+  </section>
+  <div id="c-tip"></div>
+
+  <!-- GENERI -->
+  <section class="panel" id="panel-gen">
+    <div class="panel-title">🌳 Albero dei Generi</div>
+    <div class="panel-sub">Come si ramifica la musica italiana · zoom con la rotella</div>
+    <svg id="genreSvg"></svg>
+  </section>
+
+  <!-- SANREMO -->
+  <section class="panel" id="panel-sanremo">
+    <div class="panel-title">🌹 Festival di Sanremo</div>
+    <div class="panel-sub">Tutte le edizioni · vincitori · curiosità</div>
+    <div class="sanremo-filters" id="sanremoFilters"></div>
+    <div class="sanremo-grid" id="sanremoGrid"></div>
+  </section>
+
+  <!-- ACCORDI -->
+  <section class="panel" id="panel-accordi">
+    <div class="panel-title">🎸 Accordi</div>
+    <div class="panel-sub">Cerca gli accordi delle tue canzoni preferite</div>
+    <div class="accordi-tabs">
+      <button class="accordi-tab active" onclick="setAccordiTab('chitarra',this)">🎸 Chitarra</button>
+      <button class="accordi-tab" onclick="setAccordiTab('piano',this)">🎹 Pianoforte</button>
+    </div>
+    <div id="accordiTabContent"></div>
+  </section>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+
+const MO=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+const MN=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const NOW=new Date(), TD=NOW.getDate(), TM=NOW.getMonth()+1;
+
+const EVENTS=[
+  {d:6,m:1,y:1938,t:'nascita',desc:'Nasce Adriano Celentano a Milano',det:'Soprannominato "il Molleggiato", diventerà una delle icone più durature della musica e del cinema italiano, oltre che un imprenditore discografico pionieristico.'},
+  {d:9,m:1,y:1928,t:'nascita',desc:'Nasce Domenico Modugno a Polignano a Mare (BA)',det:'Autore e interprete di "Volare", la prima canzone italiana a vincere il Grammy Award nel 1959. Rappresentò l\'Italia all\'Eurovision Song Contest.'},
+  {d:11,m:1,y:1999,t:'morte',desc:'Muore Fabrizio De André a Milano',det:'Il poeta genovese si spense a 58 anni per un tumore. Aveva appena terminato le registrazioni dell\'album "Anime salve". Il mondo della musica italiana si fermò.'},
+  {d:27,m:1,y:1967,t:'evento',desc:'Luigi Tenco si suicida all\'Hotel Savoy di Sanremo',det:'Dopo l\'eliminazione dalla gara con "Ciao amore ciao", il cantautore ligure si tolse la vita lasciando un biglietto di protesta contro il Festival. Il gesto scosse il mondo musicale italiano.'},
+  {d:29,m:1,y:1951,t:'sanremo',desc:'Prima edizione del Festival di Sanremo',det:'Si svolge nella sala delle feste del Casinò di Sanremo. Vince Nilla Pizzi con "Grazie dei fiori". Partecipano tre soli cantanti. È l\'inizio di un\'istituzione culturale italiana.'},
+  {d:7,m:2,y:1952,t:'nascita',desc:'Nasce Vasco Rossi a Zocca (MO)',det:'Il "Blasco" diventerà negli anni \'80 il simbolo del rock italiano, con testi crudi e autentici sulla vita quotidiana. Tiene tuttora i concerti con il maggior numero di spettatori in Italia.'},
+  {d:18,m:2,y:1940,t:'nascita',desc:'Nasce Fabrizio De André a Genova',det:'Figlio di una famiglia benestante, scelse la musica per raccontare gli ultimi della società: prostitute, mendicanti, disertori. "La guerra di Piero" e "Via del Campo" sono capolavori immortali.'},
+  {d:22,m:2,y:1946,t:'nascita',desc:'Nasce Riccardo Cocciante a Saigon (Vietnam)',det:'Figlio di un diplomatico italiano, Cocciante nacque in Indocina. È celebre per "Bella senz\'anima" (1974) e per il musical "Notre-Dame de Paris" che ha venduto milioni di copie in tutto il mondo.'},
+  {d:3,m:3,y:1943,t:'nascita',desc:'Nasce Lucio Dalla a Bologna',det:'Clarinettista jazz di formazione, Dalla divenne uno dei cantautori più amati. "Caruso" (1986), scritta in una notte a Sorrento, è considerata una delle più belle canzoni italiane del Novecento.'},
+  {d:5,m:3,y:1943,t:'nascita',desc:'Nasce Lucio Battisti a Poggio Bustone (RI)',det:'In coppia con il paroliere Mogol, Battisti rivoluzionò la canzone italiana tra gli anni \'60 e \'70. La sua ritrosia dai media lo trasformò in una figura quasi leggendaria.'},
+  {d:6,m:3,y:1949,t:'nascita',desc:'Nasce Antonello Venditti a Roma',det:'Cantautore romano, simbolo della scena di Via del Corso insieme a De Gregori. "Notte prima degli esami" (1984) è l\'inno generazionale di milioni di italiani.'},
+  {d:19,m:3,y:1955,t:'nascita',desc:'Nasce Pino Daniele a Napoli',det:'Cresciuto nei Quartieri Spagnoli, Pino Daniele fuse il blues americano con la tradizione partenopea, creando il cosiddetto "neapolitan blues". La sua morte improvvisa nel 2015 lasciò attonita tutta l\'Italia.'},
+  {d:21,m:3,y:1938,t:'nascita',desc:'Nasce Luigi Tenco a Cassine (AL)',det:'Considerato uno dei padri del cantautorato italiano, Tenco fu un animo tormentato che lasciò un catalogo di canzoni di straordinaria profondità emotiva e letteraria.'},
+  {d:25,m:3,y:1940,t:'nascita',desc:'Nasce Mina (Anna Maria Mazzini) a Busto Arsizio',det:'Considerata la più grande interprete della canzone italiana del Novecento, Mina possedeva una voce di tre ottave. Nel 1978 abbandonò le scene live ma continuò a incidere dischi di altissima qualità.'},
+  {d:4,m:4,y:1951,t:'nascita',desc:'Nasce Francesco De Gregori a Roma',det:'Soprannominato "il Principe" della canzone d\'autore, De Gregori è famoso per testi poetici, simbolici e spesso criptici. "Rimmel" (1975) è uno dei dischi più importanti del cantautorato italiano.'},
+  {d:6,m:4,y:1935,t:'nascita',desc:'Nasce Fred Bongusto a Campobasso',det:'Laureato in medicina, preferì la chitarra alla carriera medica. Le sue ballate romantiche come "Una rotonda sul mare" e "Malaga" definirono un\'intera stagione estiva italiana degli anni \'60.'},
+  {d:9,m:4,y:1948,t:'nascita',desc:'Nasce Patty Pravo (Nicoletta Strambelli) a Venezia',det:'Icona ribelle degli anni \'60, viveva praticamente al Piper Club di Roma quando fu scoperta. "La bambola" (1968) rimane uno dei brani italiani più riconoscibili del decennio.'},
+  {d:16,m:5,y:1951,t:'nascita',desc:'Nasce Claudio Baglioni a Roma',det:'Baglioni è l\'autore di alcuni tra i più celebri brani romantici italiani. "Questo piccolo grande amore" (1972) rimane un punto di riferimento della canzone pop, scritto in forma di concept album.'},
+  {d:17,m:6,y:1936,t:'nascita',desc:'Nasce Mogol (Giulio Rapetti) a Milano',det:'Il più grande paroliere della canzone italiana. La sua collaborazione con Battisti produsse oltre 130 canzoni in 13 anni. I suoi testi hanno dato voce alle emozioni di generazioni di italiani.'},
+  {d:8,m:7,y:1958,t:'canzone',desc:'"Volare" di Modugno conquista la vetta delle classifiche USA',det:'Prima canzone italiana a raggiungere il numero 1 in America. Frank Sinatra la definì "la canzone più bella che abbia mai sentito" e ne registrò una versione. Il brano fu certificato disco d\'oro negli States.'},
+  {d:23,m:8,y:1945,t:'nascita',desc:'Nasce Rita Pavone a Torino',det:'Prima artista italiana a esibirsi all\'Ed Sullivan Show americano, nel 1964. "La partita di pallone" e "Il ballo del mattone" la resero famosa in tutta Europa a soli 18 anni.'},
+  {d:22,m:9,y:1934,t:'nascita',desc:'Nasce Ornella Vanoni a Milano',det:'Una delle voci più sofisticate della canzone italiana, Vanoni ha sempre alternato pop, jazz e bossa nova. Prima di cantare da sola recitò al Piccolo Teatro di Milano con Giorgio Strehler.'},
+  {d:16,m:10,y:1946,t:'nascita',desc:'Nasce Caterina Caselli a Modena',det:'Famosa per la chioma bionda e l\'energia travolgente, Caselli lasciò la carriera artistica per fondare la Sugar Music, una delle etichette più importanti d\'Italia, scoprendo artisti come Elisa e Zucchero.'},
+  {d:11,m:12,y:1944,t:'nascita',desc:'Nasce Gianni Morandi a Monghidoro (BO)',det:'Simbolo del "bravo ragazzo" italiano degli anni \'60, Morandi ha attraversato sei decenni di successi. "Fatti mandare dalla mamma" (1962) fu il suo primo grande hit, inciso a soli 17 anni.'},
+  {d:18,m:3,y:1945,t:'nascita',desc:'Nasce Bobby Solo (Roberto Satti) a Roma',det:'Prese il nome d\'arte ispirandosi a Buddy Holly e all\'idea dello showman solitario americano. La sua versione di "Una lacrima sul viso" (1964) fu tradotta e incisa in 12 lingue.'},
+  {d:28,m:1,y:1958,t:'sanremo',desc:'Domenico Modugno presenta "Nel blu dipinto di blu" al Festival di Sanremo',det:'La canzone, poi nota come "Volare", rivoluzionò il Festival e la musica italiana. In Italia si vendettero 800.000 copie; negli USA scalò le classifiche per settimane.'},
+  {d:5,m:11,y:1959,t:'canzone',desc:'Modugno vince il Grammy Award per la seconda volta',det:'"Nel blu dipinto di blu" (Volare) e "Piove" sono la prima e la seconda canzone italiana a vincere il Grammy. Modugno è l\'unico artista italiano ad aver vinto il Grammy due volte.'},
+
+  // 3 GIUGNO
+  {d:3,m:6,y:1935,t:'nascita',desc:'Nasce Enzo Jannacci a Milano',det:'Cantautore, cabarettista e pianista, Jannacci è stato una delle figure più originali e anticonvenzionali della musica italiana.'},
+  {d:3,m:6,y:1960,t:'canzone',desc:'Mina lancia il singolo "Il cielo in una stanza"',det:'Scritta da Gino Paoli, la canzone diventa uno dei classici della musica italiana.'},
+  {d:3,m:6,y:1967,t:'canzone',desc:'Fausto Leali è primo in classifica con "A chi"',det:''},
+  {d:3,m:6,y:1972,t:'canzone',desc:'"I giardini di marzo" di Lucio Battisti è in cima alla hit parade',det:''},
+  {d:3,m:6,y:1982,t:'canzone',desc:'Giuni Russo lancia il singolo "Un\'estate al mare"',det:''},
+  {d:3,m:6,y:1992,t:'canzone',desc:'Luca Carboni è in vetta alle classifiche con "Ci vuole un fisico bestiale"',det:''},
+  {d:3,m:6,y:2006,t:'canzone',desc:'I Negramaro lanciano "Nuvole e lenzuola"',det:''},
+
+  // 4 GIUGNO
+  {d:4,m:6,y:1944,t:'nascita',desc:'Nasce Antoine, cantante italo-francese',det:''},
+  {d:4,m:6,y:1957,t:'nascita',desc:'Nasce Luca Madonia a Catania',det:''},
+  {d:4,m:6,y:1971,t:'canzone',desc:'Mia Martini pubblica il singolo "Padre davvero"',det:''},
+  {d:4,m:6,y:1978,t:'canzone',desc:'Patty Pravo è in vetta alle classifiche con "La bambola"',det:''},
+  {d:4,m:6,y:1981,t:'album',desc:'Pino Daniele rilascia l\'album "Vai mò"',det:''},
+  {d:4,m:6,y:1993,t:'canzone',desc:'Laura Pausini lancia "Non c\'è"',det:''},
+  {d:4,m:6,y:2014,t:'album',desc:'I Subsonica pubblicano "Lazzaro"',det:''},
+
+  // 5 GIUGNO
+  {d:5,m:6,y:1957,t:'nascita',desc:'Nasce Enrico Ruggeri a Milano',det:'Cantautore, vincitore di Sanremo 1987 con "Si può dare di più" insieme a Morandi e Tozzi.'},
+  {d:5,m:6,y:1969,t:'nascita',desc:'Nasce Marina Rei a Roma',det:'Cantautrice romana, nota per "Un inverno da baciare" e la sua voce inconfondibile.'},
+  {d:5,m:6,y:1970,t:'canzone',desc:'"Pensieri e parole" di Lucio Battisti è in cima alla hit parade',det:''},
+  {d:5,m:6,y:1982,t:'canzone',desc:'Alberto Camerini lancia il singolo "Tanz bambolina"',det:''},
+  {d:5,m:6,y:1999,t:'canzone',desc:'Jovanotti è tra gli artisti più trasmessi in radio con "Per te"',det:''},
+  {d:5,m:6,y:2009,t:'album',desc:'Fabrizio Moro rilascia l\'album "Barabba"',det:''},
+  {d:5,m:6,y:2020,t:'canzone',desc:'Esce "Balla per me" di Tiziano Ferro e Jovanotti',det:''},
+
+  // 6 GIUGNO
+  {d:6,m:6,y:1959,t:'canzone',desc:'Fred Buscaglione è in vetta alle classifiche con "Guarda che luna"',det:''},
+  {d:6,m:6,y:1965,t:'nascita',desc:'Nasce Danilo Sacco ad Agliano Terme, ex voce dei Nomadi',det:''},
+  {d:6,m:6,y:1972,t:'nascita',desc:'Nasce Cristina Scabbia a Milano, leader dei Lacuna Coil',det:''},
+  {d:6,m:6,y:1978,t:'canzone',desc:'"Generale" di Francesco De Gregori è in cima alla hit parade',det:''},
+  {d:6,m:6,y:1997,t:'album',desc:'Gli 883 pubblicano il disco "La dura legge del gol!"',det:''},
+  {d:6,m:6,y:1998,t:'canzone',desc:'Alex Britti lancia "Solo una volta (o tutta la vita)"',det:''},
+  {d:6,m:6,y:2008,t:'canzone',desc:'Malika Ayane rilascia il suo brano d\'esordio "Sospesa"',det:''},
+  {d:6,m:6,y:2013,t:'album',desc:'Claudio Baglioni rende disponibile "Dieci dita"',det:''},
+  {d:6,m:6,y:2014,t:'canzone',desc:'Luca Carboni e Jovanotti duettano in "Ci vuole un fisico bestiale"',det:''},
+
+  // 7 GIUGNO
+  {d:7,m:6,y:1936,t:'nascita',desc:'Nasce Pippo Baudo a Militello',det:'Il presentatore televisivo più longevo della RAI, ha condotto Sanremo numerose volte.'},
+  {d:7,m:6,y:1976,t:'canzone',desc:'"Ancora tu" di Lucio Battisti è in cima alla hit parade',det:''},
+  {d:7,m:6,y:2002,t:'canzone',desc:'Tiziano Ferro pubblica il singolo "Rosso relativo"',det:''},
+  {d:7,m:6,y:2011,t:'album',desc:'I Nomadi rilasciano l\'album "Cuore vivo"',det:''},
+  {d:7,m:6,y:2019,t:'canzone',desc:'Debutta in radio "1969" di Achille Lauro',det:''},
+  {d:7,m:6,y:2023,t:'morte',desc:'Scompare la cantante Irma Capece Minutolo',det:''},
+
+  // 8 GIUGNO
+  {d:8,m:6,y:1963,t:'canzone',desc:'Rita Pavone è prima in classifica con "Il ballo del mattone"',det:''},
+  {d:8,m:6,y:1968,t:'canzone',desc:'Caterina Caselli è in cima alla hit parade con "Il volto della vita"',det:''},
+  {d:8,m:6,y:1972,t:'album',desc:'Alan Sorrenti pubblica il suo primo album "Aria"',det:''},
+  {d:8,m:6,y:1994,t:'album',desc:'Giorgia lancia il suo primo omonimo album',det:''},
+  {d:8,m:6,y:1995,t:'album',desc:'Raf rilascia il disco "Manifesto"',det:''},
+  {d:8,m:6,y:2013,t:'canzone',desc:'Max Gazzè lancia "I tuoi maledettissimi impegni"',det:''},
+  {d:8,m:6,y:2016,t:'album',desc:'I Pooh lanciano "Ancora una canzone"',det:''},
+  {d:8,m:6,y:2018,t:'morte',desc:'Scompare il cantautore Gino Santercole',det:''},
+  {d:8,m:6,y:2018,t:'album',desc:'Esce l\'album "Sputnik" di Luca Carboni',det:''},
+
+  // 9 GIUGNO
+  {d:9,m:6,y:1960,t:'canzone',desc:'Mina lancia il singolo "Una zebra a pois"',det:''},
+  {d:9,m:6,y:1968,t:'canzone',desc:'Gianni Morandi è in vetta alle classifiche con "Chimera"',det:''},
+  {d:9,m:6,y:1979,t:'nascita',desc:'Nasce Roberto Casalino ad Avellino',det:'Cantautore e autore di successi per Laura Pausini, Alessandra Amoroso e molti altri.'},
+  {d:9,m:6,y:1985,t:'album',desc:'Claudio Baglioni rilascia l\'album "La vita è adesso"',det:'Uno degli album più venduti della storia della musica italiana, con oltre un milione di copie.'},
+  {d:9,m:6,y:2000,t:'album',desc:'Franco Battiato lancia il disco "Campi magnetici"',det:''},
+  {d:9,m:6,y:2013,t:'canzone',desc:'Levante lancia "Alfonso"',det:''},
+
+  // 10 GIUGNO
+  {d:10,m:6,y:1980,t:'album',desc:'Nino D\'Angelo lancia l\'album "Celebrità"',det:''},
+  {d:10,m:6,y:1993,t:'album',desc:'I Nomadi rilasciano il disco "Contro"',det:''},
+  {d:10,m:6,y:1999,t:'canzone',desc:'"Mi piaci" di Alex Britti è in cima alla hit parade',det:''},
+  {d:10,m:6,y:2005,t:'album',desc:'Gianluca Grignani rilascia il disco "Il re del niente"',det:''},
+  {d:10,m:6,y:2006,t:'canzone',desc:'Tiziano Ferro è primo in classifica con "Stop! Dimentica"',det:''},
+  {d:10,m:6,y:2014,t:'album',desc:'Mina rende disponibile il disco "Selfie"',det:''},
+  {d:10,m:6,y:2014,t:'album',desc:'Michele Bravi pubblica il suo primo album "A passi piccoli"',det:''},
+  {d:10,m:6,y:2016,t:'canzone',desc:'Noemi pubblica "Idealista!", scritta da Ivano Fossati',det:''},
+];
+
+const CURIOSITA=[
+  {a:'Mina',d:"anni '60",tag:'scandalo',txt:'Nel 1963 Mina causò uno scandalo nazionale per la relazione con l\'attore Corrado Pani, già sposato. La RAI le vietò qualsiasi apparizione televisiva per due anni. La popolarità di Mina ne uscì però rafforzata.'},
+  {a:'Mina',d:"anni '70",tag:'ritiro',txt:'Nel 1978, all\'apice del successo, Mina si ritirò dalle esibizioni live a soli 38 anni. Non è mai più tornata su un palcoscenico. Tuttavia ha continuato a incidere album ogni anno, e ancora oggi pubblica dischi.'},
+  {a:'Lucio Battisti',d:"anni '70",tag:'collaborazione',txt:'Battisti e il paroliere Mogol collaborarono per 13 anni creando oltre 130 canzoni. La loro separazione, nel 1980, rimane avvolta nel mistero: nessuna delle due parti ha mai fornito una spiegazione pubblica.'},
+  {a:'Lucio Battisti',d:"anni '70",tag:'riservatezza',txt:'Battisti era notoriamente schivo: non rilasciava interviste, non appariva in TV, rifiutava qualsiasi forma di esposizione pubblica. La sua voce era nota a tutti, ma il suo viso alla fine quasi a nessuno.'},
+  {a:'Fabrizio De André',d:"anni '60",tag:'origini',txt:'De André era figlio di un ricco industriale genovese. Non aveva alcun bisogno economico di lavorare. Eppure scelse la musica come strumento per raccontare gli emarginati e gli oppressi, come prostitute, vagabondi e disertori.'},
+  {a:'Fabrizio De André',d:"anni '70",tag:'sequestro',txt:'Nel 1979 De André e la moglie Dori Ghezzi furono sequestrati dall\'Anonima Sarda in Sardegna per quattro mesi. L\'esperienza lo segnò profondamente. Anni dopo, in un\'intervista, disse che i suoi carcerieri erano diventati suoi amici.'},
+  {a:'Domenico Modugno',d:"anni '50",tag:'Grammy',txt:'"Nel blu dipinto di blu" (Volare) fu la prima canzone italiana a vincere il Grammy Award nel 1959. Frank Sinatra la definì "la più bella canzone che abbia mai sentito" e ne incise una celebre versione.'},
+  {a:'Domenico Modugno',d:"anni '50",tag:'rifiuti',txt:'La canzone "Volare" fu inizialmente rifiutata da tutti i discografici italiani. Modugno stesso la difese con ostinazione e convinse la Fonit Cetra a pubblicarla. Fu un errore storico non credere in quel brano.'},
+  {a:'Luigi Tenco',d:"anni '60",tag:'Sanremo',txt:'La notte del 27 gennaio 1967, dopo l\'eliminazione da Sanremo, Tenco scrisse: "Faccio questo non perché sono stanco della vita, ma come atto di protesta contro il pubblico che manda a Sanremo queste cose". Poi si sparò.'},
+  {a:'Adriano Celentano',d:"anni '60",tag:'imprenditore',txt:'Celentano fondò il Clan Celentano nel 1961, una delle prime etichette indipendenti italiane. Era contrattualmente obbligatorio che tutti i dipendenti del Clan fossero parenti di Celentano o della moglie Claudia Mori.'},
+  {a:'Adriano Celentano',d:"anni '60",tag:'Azzurro',txt:'"Azzurro" (1968), probabilmente la canzone più famosa di Celentano, non fu scritta da lui ma da Paolo Conte, all\'epoca avvocato semi-sconosciuto di Asti. Celentano la incise quasi per caso e ne fece un classico eterno.'},
+  {a:'Lucio Dalla',d:"anni '60",tag:'jazz',txt:'Prima di diventare un cantautore famoso, Dalla era un clarinettista jazz professionista. Suonava in club di tutta Italia. La sua voce inconfondibile — nasale e graffiante — fu inizialmente considerata un limite, non un pregio.'},
+  {a:'Pino Daniele',d:"anni '70",tag:'stile',txt:'Pino Daniele inventò uno stile unico che i critici chiamarono "neapolitan blues": una fusione tra il blues del Mississippi, il jazz e la tradizione musicale napoletana. Suonava la chitarra in modo assolutamente originale.'},
+  {a:'Patty Pravo',d:"anni '60",tag:'origini',txt:'Quando fu scoperta dal manager Alberigo Crocetta, Patty Pravo praticamente viveva al Piper Club di Roma, il locale simbolo del beat italiano. Aveva 16 anni e ballava lì ogni sera. La sua andatura insolente divenne iconica.'},
+  {a:'Gino Paoli',d:"anni '60",tag:'vita privata',txt:'Nel 1963, in preda a una crisi sentimentale, Gino Paoli si sparò al petto con una pistola. Sopravvisse miracolosamente grazie all\'intervento chirurgico. La vicenda ispirò la canzone "Sassi" di Luigi Tenco, suo grande amico.'},
+  {a:'Bobby Solo',d:"anni '60",tag:'origini',txt:'Roberto Satti scelse il nome "Bobby Solo" ispirandosi a Buddy Holly e all\'idea dello showman solitario americano. "Una lacrima sul viso" (1964) fu tradotta e incisa in 12 lingue diverse, diventando un successo europeo.'},
+  {a:'Caterina Caselli',d:"anni '70",tag:'produttrice',txt:'Dopo aver lasciato la carriera artistica negli anni \'70, Caselli fondò la Sugar Music. Tra i suoi artisti: Elisa, Zucchero, Negramaro, Andrea Bocelli. È ancora oggi una delle figure più potenti dell\'industria musicale italiana.'},
+  {a:'Rita Pavone',d:"anni '60",tag:'USA',txt:'Rita Pavone fu la prima artista italiana all\'Ed Sullivan Show nel 1964, lo stesso programma che aveva lanciato i Beatles poche settimane prima. "La partita di pallone" fece impazzire il pubblico americano.'},
+  {a:'Ornella Vanoni',d:"anni '60",tag:'teatro',txt:'Prima di diventare cantante solista, Ornella Vanoni recitò in teatro con Giorgio Strehler al Piccolo Teatro di Milano. Strehler la incoraggiò a cantare, riconoscendo in lei qualcosa di raro. Non si sbagliò.'},
+  {a:'Fred Bongusto',d:"anni '60",tag:'origini',txt:'Fred Bongusto era laureato in medicina quando decise di abbandonare la carriera medica per la chitarra. Sua madre non gli perdonò mai questa scelta e, secondo la leggenda, lo diseredò formalmente.'},
+  {a:'Paolo Conte',d:"anni '70",tag:'autore',txt:'Paolo Conte scrisse canzoni per altri artisti per anni prima di cantarle lui stesso. Era timido e si considerava un autore, non un performer. La sua voce rauca, che sembrava un difetto, divenne il suo marchio più riconoscibile.'},
+  {a:'Gianni Morandi',d:"anni '60",tag:'record',txt:'"Fatti mandare dalla mamma a prendere il latte" (1962) fu incisa quando Morandi aveva appena 17 anni e vendette oltre un milione di copie in Italia. Per gli standard dell\'epoca, era un risultato straordinario.'},
+  {a:'Lucio Battisti',d:"anni '70",tag:'composizione',txt:'Battisti componeva le melodie canticchiandole direttamente nel registratore senza saper leggere né scrivere la musica. Erano poi i musicisti dello studio a trascrivere e arrangiare ciò che lui cantava.'},
+  {a:'Fabrizio De André',d:"anni '70",tag:'lingua',txt:'De André scrisse parte dell\'album "Creuza de mä" (1984) interamente in genovese antico, una lingua che pochissimi parlano. Disse che il genovese era perfetto per la musica perché "suona come il mare".'},
+  // NUOVE CURIOSITÀ
+  {a:'Mina',d:"anni '60",tag:'voce',txt:'La voce di Mina copre tre ottave e mezza — un\'estensione rarissima. I tecnici di studio raccontano che spesso incideva le sue parti in un\'unica take, senza bisogno di correzioni.'},
+  {a:'Mina',d:"anni '70",tag:'televisione',txt:'Il programma TV "Mina" del 1978, l\'ultimo prima del suo ritiro, rimane uno dei più visti nella storia della RAI. L\'ultima puntata fu seguita da oltre 20 milioni di spettatori.'},
+  {a:'Lucio Battisti',d:"anni '80",tag:'svolta',txt:'Dopo la rottura con Mogol, Battisti collaborò con il poeta Pasquale Panella. Il nuovo sound elettronico e i testi ermetici disorientarono il pubblico, ma oggi quegli album sono rivalutati come opere d\'avanguardia.'},
+  {a:'Fabrizio De André',d:"anni '60",tag:'traduzioni',txt:'De André fu il primo a tradurre in italiano Georges Brassens e Leonard Cohen, introducendo il pubblico italiano a una canzone d\'autore colta e impegnata.'},
+  {a:'Fabrizio De André',d:"anni '70",tag:'impegno',txt:'De André era un anarchico convinto. Rifiutò sempre qualsiasi forma di potere istituzionale: non accettò premi statali, non si candidò mai, non fece campagne politiche. La sua unica bandiera era la musica.'},
+  {a:'Domenico Modugno',d:"anni '50",tag:'ispirazione',txt:'"Nel blu dipinto di blu" nacque da un sogno che Modugno raccontò al paroliere Franco Migliacci. Migliacci, guardando un quadro di Marc Chagall, ebbe l\'illuminazione definitiva. L\'intera canzone fu scritta in una notte.'},
+  {a:'Luigi Tenco',d:"anni '60",tag:'jazz',txt:'Prima di dedicarsi alla canzone d\'autore, Tenco aveva suonato il clarinetto e il sassofono in vari gruppi jazz. La sua formazione musicale americana si sente nella struttura armonica delle sue canzoni.'},
+  {a:'Luigi Tenco',d:"anni '60",tag:'cinema',txt:'Tenco partecipò come attore a diversi film della commedia italiana degli anni \'60. Era considerato affascinante e fotogenico, ma preferiva la musica al cinema.'},
+  {a:'Adriano Celentano',d:"anni '60",tag:'rock',txt:'Celentano fu tra i primi italiani a suonare rock and roll. Nel 1957, al primo Festival del Rock and Roll italiano, vinse ballando in modo così frenetico da guadagnarsi per sempre il soprannome "il Molleggiato".'},
+  {a:'Adriano Celentano',d:"anni '80",tag:'televisione',txt:'I programmi TV di Celentano negli anni \'80 — come "Fantastico" — erano seguiti da decine di milioni di spettatori e spesso provocavano polemiche per i contenuti controcorrente.'},
+  {a:'Lucio Dalla',d:"anni '70",tag:'Caruso',txt:'"Caruso" fu composta in una sola notte nell\'hotel di Sorrento dove aveva soggiornato il tenore Enrico Caruso. Dalla racconta di aver sentito una voce di donna cantare quella notte, il che lo ispirò.'},
+  {a:'Vasco Rossi',d:"anni '80",tag:'origini',txt:'Prima del successo, Vasco gestiva una radio locale a Zocca — Radio Samoggia — dove conduceva programmi notturni. Fu lì che capì il potere della musica diretta e senza filtri.'},
+  {a:'Vasco Rossi',d:"anni '80",tag:'Sanremo',txt:'Vasco partecipò a Sanremo nel 1982 con "Vado al massimo" arrivando ultimo, e nel 1983 con "Vita spericolata" arrivando penultimo. Paradossalmente, quelle canzoni diventarono tra le più amate di sempre.'},
+  {a:'Pino Daniele',d:"anni '70",tag:'dialetto',txt:'Pino Daniele fu uno dei primi artisti a cantare in napoletano moderno senza cadere nel folklore. I suoi testi mescolavano italiano, dialetto e qualche parola inglese in modo naturale e rivoluzionario.'},
+  {a:'Pino Daniele',d:"anni '80",tag:'collaborazioni',txt:'Negli anni \'80 Pino Daniele collaborò con Pat Metheny e James Senese, portando il suono napoletano nel jazz internazionale. Era rispettato quanto Zucchero nel mondo anglosassone.'},
+  {a:'Gianni Morandi',d:"anni '70",tag:'attore',txt:'Morandi fu anche un attore molto popolare negli anni \'60 e \'70, interpretando il ruolo del "bravo ragazzo" in numerosi film. La sua immagine pulita fu sia una risorsa che un limite artistico.'},
+  {a:'Ornella Vanoni',d:"anni '70",tag:'bossa nova',txt:'Ornella Vanoni fu una delle prime cantanti italiane ad appassionarsi alla bossa nova brasiliana. Trascorse periodi in Brasile e collaborò con compositori come Toquinho e Vinícius de Moraes.'},
+  {a:'Patty Pravo',d:"anni '70",tag:'immagine',txt:'Patty Pravo fu la prima rockstar italiana nel senso moderno del termine: continuo cambio di immagine, vita spericolata, scandali e una voce unica. Anticipò di vent\'anni quello che sarebbe diventato normale.'},
+  {a:'Gino Paoli',d:"anni '60",tag:'composizione',txt:'Gino Paoli scrisse "Il cielo in una stanza" nel 1960 per Mina. La canzone è considerata uno dei classici italiani. Paoli la compose in pochissimi minuti, quasi per scherzo.'},
+  {a:'Claudio Baglioni',d:"anni '70",tag:'concept',txt:'"Questo piccolo grande amore" (1972) è uno dei rarissimi concept album della musica italiana. Baglioni racconta la storia di un amore adolescenziale in ordine cronologico, dalla nascita alla fine.'},
+  {a:'Claudio Baglioni',d:"anni '80",tag:'record',txt:'"La vita è adesso" (1985) fu uno degli album più venduti nella storia della musica italiana, con oltre un milione di copie. Baglioni tenne un tour negli stadi con sold-out ovunque.'},
+  {a:'Franco Battiato',d:"anni '70",tag:'avanguardia',txt:'Prima del successo pop degli anni \'80, Battiato fu un pioniere della musica elettronica in Italia. I suoi album degli anni \'70 — come "Fetus" e "Pollution" — erano considerati inascoltabili dal grande pubblico.'},
+  {a:'Franco Battiato',d:"anni '80",tag:'svolta',txt:'"La voce del padrone" (1981) fu il primo album italiano a vendere un milione di copie. Battiato disse che era un esperimento, non una conversione al pop.'},
+  {a:'Franco Battiato',d:"anni '80",tag:'filosofia',txt:'Battiato era appassionato di filosofia orientale, misticismo sufi e meditazione. Questi interessi permeano i suoi testi, pieni di riferimenti esoterici che convivono con melodie orecchiabili.'},
+  {a:'Francesco De Gregori',d:"anni '70",tag:'poesia',txt:'De Gregori fu soprannominato "il Principe" della canzone d\'autore per la densità poetica dei suoi testi. "Rimmel" (1975) è considerato uno dei dischi più importanti del cantautorato italiano.'},
+  {a:'Francesco De Gregori',d:"anni '70",tag:'contestazione',txt:'Nel 1976 De Gregori fu fischiato durante un concerto al Palalido di Milano da chi lo accusava di essere "troppo oscuro" e "poco politico". L\'episodio fu traumatico e lo indusse al silenzio per anni.'},
+  {a:'Riccardo Cocciante',d:"anni '70",tag:'origini',txt:'Cocciante nacque a Saigon nel 1946, figlio di un diplomatico italiano. Crebbe tra più culture e lingue, il che si riflette nella sua musica, che fonde la tradizione italiana con influenze francesi.'},
+  {a:'Riccardo Cocciante',d:"anni '90",tag:'musical',txt:'"Notre-Dame de Paris" (1998) è diventato uno dei musical più visti al mondo, con oltre 5.000 rappresentazioni in più di 20 paesi e 3 milioni di copie della colonna sonora vendute solo in Francia.'},
+  {a:'Francesco Guccini',d:"anni '70",tag:'epica',txt:'"La locomotiva" (1972) è considerata l\'inno della sinistra italiana. Guccini si è sempre schermito: diceva di aver scritto una storia, non un manifesto politico.'},
+  {a:'Francesco Guccini',d:"anni '70",tag:'lunghezza',txt:'Guccini è famoso per le canzoni lunghissime — alcune durano più di 10 minuti. Diceva che le sue canzoni erano romanzi condensati in musica, non canzoni nel senso tradizionale.'},
+  {a:'Giorgio Gaber',d:"anni '70",tag:'teatro',txt:'Giorgio Gaber inventò il "teatro canzone": spettacoli in cui alternava canzoni e monologhi. Era un formato nuovo che usava per una critica acutissima della società italiana borghese.'},
+  {a:'Rino Gaetano',d:"anni '70",tag:'satira',txt:'"Ma il cielo è sempre più blu" (1975) elencava le contraddizioni dell\'Italia in modo apparentemente innocente ma tagliente. Rino Gaetano fu il primo a portare la satira politica nel pop italiano.'},
+  {a:'Rino Gaetano',d:"anni '70",tag:'morte',txt:'Rino Gaetano morì il 2 giugno 1981 a soli 30 anni dopo un incidente stradale. Nessun ospedale lo accettò in tempo. La vicenda divenne simbolo delle disfunzioni sanitarie italiane.'},
+  {a:'PFM',d:"anni '70",tag:'prog',txt:'La Premiata Forneria Marconi fu il primo gruppo di rock progressivo italiano con successo internazionale. Il produttore Pete Sinfield (ex King Crimson) li lanciò nel mercato anglosassone nel 1973.'},
+  {a:'I Pooh',d:"anni '70",tag:'longevità',txt:'I Pooh sono il gruppo italiano con la carriera più lunga: oltre 50 anni di attività. Hanno venduto più di 50 milioni di dischi e sono l\'unico gruppo italiano ad aver suonato al Madison Square Garden di New York.'},
+  {a:'Zucchero',d:"anni '80",tag:'blues',txt:'Zucchero portò il blues e il soul nella musica italiana. La sua collaborazione con Ray Charles, Miles Davis e Pavarotti lo rese il più internazionale degli artisti italiani degli anni \'90.'},
+  {a:'Eros Ramazzotti',d:"anni '80",tag:'Sanremo',txt:'Eros Ramazzotti vinse Sanremo nella categoria giovani nel 1984 e poi nella categoria big nel 1986. Fu uno dei pochi artisti a vincere in entrambe le categorie dello stesso festival.'},
+  {a:'Al Bano',d:"anni '60",tag:'origini',txt:'Al Bano nacque in una famiglia di contadini pugliesi. Da giovane emigrò a Milano come lavapiatti per inseguire il sogno della musica. Il successo arrivò con "Nel sole" (1967), scritta da Don Backy.'},
+  {a:'Gigliola Cinquetti',d:"anni '60",tag:'Eurovision',txt:'Gigliola Cinquetti vinse l\'Eurovision Song Contest nel 1964 a soli 16 anni con "Non ho l\'età". Fu la più giovane vincitrice nella storia del concorso e la canzone è ancora oggi famosa in tutta Europa.'},
+  {a:'Nilla Pizzi',d:"anni '50",tag:'Sanremo',txt:'Nilla Pizzi vinse le prime due edizioni del Festival di Sanremo, nel 1951 e nel 1952. È l\'unica artista ad aver vinto nelle prime due edizioni consecutive. La sua "Vola colomba" fu un inno nazionale.'},
+  {a:'Ivano Fossati',d:"anni '80",tag:'autore',txt:'Ivano Fossati è uno degli autori più richiesti: ha scritto per Mia Martini, Loredana Berté, Ornella Vanoni e De Gregori. I suoi testi combinano immagini surreali e un profondo senso melodico.'},
+  {a:'Mia Martini',d:"anni '70",tag:'maledizione',txt:'Mia Martini, soprannominata "Mimì", fu vittima di una diceria infamante: girava voce che portasse sfortuna. Molti colleghi e produttori la evitarono per anni. Nonostante questo rimase una delle voci più belle della musica italiana.'},
+  {a:'Mia Martini',d:"anni '70",tag:'Sanremo',txt:'Mia Martini tornò a Sanremo nel 1989 con "Almeno tu nell\'universo" dopo anni di emarginazione. Il pubblico le tributò una standing ovation. La canzone è oggi considerata uno dei capolavori assoluti della musica italiana.'},
+  {a:'Loredana Berté',d:"anni '70",tag:'ribellione',txt:'Loredana Berté fu la prima artista italiana a incarnare un\'estetica punk e provocatoria. Si presentò a Sanremo con un pancione finto e sfidò continuamente le convenzioni dell\'industria musicale.'},
+  {a:'Antonello Venditti',d:"anni '70",tag:'Roma',txt:'"Roma capoccia" (1972) è diventata quasi un inno non ufficiale della città. Venditti la scrisse a 21 anni, ispirandosi ai vicoli di Trastevere. Ancora oggi viene cantata allo stadio Olimpico.'},
+  {a:'Roberto Vecchioni',d:"anni '70",tag:'professore',txt:'Roberto Vecchioni fu per decenni professore di latino e greco al liceo mentre costruiva la sua carriera musicale. Insegnava di giorno e suonava di notte. I suoi studenti spesso non sapevano chi fosse.'},
+  {a:'Angelo Branduardi',d:"anni '70",tag:'medioevo',txt:'Angelo Branduardi attinse a melodie medievali e rinascimentali per creare un suono unico. Il suo album "Alla fiera dell\'est" (1976) fu un fenomeno inaspettato: vendette oltre tre milioni di copie in tutta Europa.'},
+  {a:'Ennio Morricone',d:"anni '60",tag:'cinema',txt:'Morricone compose oltre 500 colonne sonore per film di ogni genere. Il suo rapporto con Sergio Leone diede vita a capolavori come "C\'era una volta il West". Lavorò fino a quasi 90 anni.'},
+  {a:'883',d:"anni '90",tag:'origini',txt:'Max Pezzali e Mauro Repetto si conobbero al liceo a Pavia. Gli 883 scrissero le loro prime canzoni nella cameretta di Max, raccontando la noia e i sogni della provincia italiana. Divennero la colonna sonora di una generazione.'},
+  {a:'Ligabue',d:"anni '90",tag:'origini',txt:'Luciano Ligabue lavorava come operaio e conduceva una radio locale a Correggio prima di sfondare. La sua musica mescola rock americano e storie di vita emiliana, rendendolo il cantore della provincia italiana.'},
+  {a:'Laura Pausini',d:"anni '90",tag:'Sanremo',txt:'Laura Pausini vinse Sanremo Giovani nel 1993 con "La solitudine" a soli 18 anni. La canzone fu tradotta in spagnolo e divenne un successo in tutta l\'America Latina. È oggi una delle artiste italiane più vendute al mondo.'},
+  {a:'Eros Ramazzotti',d:"anni '90",tag:'internazionale',txt:'Eros Ramazzotti è l\'artista italiano con più dischi venduti all\'estero dopo Laura Pausini. I suoi album in spagnolo lo hanno reso una star in tutta l\'America Latina e in Spagna.'},
+  {a:'Carmen Consoli',d:"anni '90",tag:'cantautrice',txt:'Carmen Consoli fu soprannominata "la cantantessa" per la sua capacità di unire chitarra rock e testi in siciliano e italiano. Il suo album "Mediamente isterica" (1998) è un classico del rock italiano al femminile.'},
+  {a:'Subsonica',d:"anni '90",tag:'torino',txt:'I Subsonica portarono il suono elettronico e industriale di Torino nel mainstream italiano. "Microchip emozionale" (1999) è considerato uno dei dischi più influenti del rock italiano degli anni \'90.'},
+];
+
+const INDOVINA=[
+  {n:'Lucio Battisti',h:['Nato a Poggio Bustone, in Sabina, nel 1943','Collaborò per 13 anni con il paroliere Mogol','Era notoriamente schivo: non rilasciava mai interviste','Le sue canzoni più note includono "Acqua Azzurra" e "La canzone del sole"']},
+  {n:'Fabrizio De André',h:['Nato a Genova nel 1940 da una famiglia benestante','Fu sequestrato in Sardegna nel 1979 per quattro mesi','Tradusse e adattò canzoni di Georges Brassens e Leonard Cohen','Il suo ultimo album uscì postumo nello stesso anno della sua morte']},
+  {n:'Mina',h:['Il suo vero nome è Anna Maria Mazzini','Nata a Busto Arsizio nel 1940','Possiede una voce di tre ottave','Nel 1978 si ritirò dalle esibizioni live ma continuò a incidere']},
+  {n:'Domenico Modugno',h:['Nato a Polignano a Mare, in Puglia, nel 1928','Vinse Sanremo nel 1958 con una canzone che parlava di un sogno di volare','La sua canzone più famosa fu la prima italiana a vincere il Grammy Award','Frank Sinatra la considerava la canzone più bella che avesse mai sentito']},
+  {n:'Luigi Tenco',h:['Nato a Cassine, in Piemonte, nel 1938','È considerato uno dei padri del cantautorato italiano','La sua morte avvenne in una camera d\'albergo di Sanremo nel 1967','Lasciò un biglietto di protesta contro il Festival e il pubblico italiano']},
+  {n:'Adriano Celentano',h:['Nato a Milano nel 1938, nel quartiere di Via Gluck','Fondò la propria etichetta discografica nel 1961','La sua canzone più famosa fu scritta da un avvocato torinese','È soprannominato "il Molleggiato" per il suo modo di ballare']},
+  {n:'Lucio Dalla',h:['Nato a Bologna il 4 marzo 1943','Prima di cantare pop era un clarinettista jazz','Ha scritto "Caruso", una canzone registrata a Sorrento','La canzone "4 Marzo 1943" racconta la storia della sua stessa nascita']},
+  {n:'Pino Daniele',h:['Nato a Napoli nel 1955 nei Quartieri Spagnoli','Ha fuso il blues americano con la tradizione musicale partenopea','Il suo stile è stato definito "neapolitan blues"','Il suo album di debutto "Terra mia" (1977) fu un capolavoro istantaneo']},
+];
+
+const VEROFALSO=[
+  {q:'"Volare" fu scritta da Domenico Modugno da solo',a:false,exp:'"Volare" (Nel blu dipinto di blu) fu scritta da Modugno insieme al paroliere Franco Migliacci, che si ispirò a un quadro surrealista di Marc Chagall.'},
+  {q:'"Azzurro" di Celentano fu composta dallo stesso Celentano',a:false,exp:'"Azzurro" (1968) fu scritta da Paolo Conte, all\'epoca avvocato quasi sconosciuto di Asti. Celentano la incise quasi per caso e ne fece un classico eterno.'},
+  {q:'Lucio Battisti era solito rilasciare pochissime interviste nel corso della sua carriera',a:true,exp:'Battisti era notoriamente schivo e rifiutava la ribalta mediatica. Negli ultimi anni della sua vita divenne quasi invisibile al pubblico.'},
+  {q:'Il Festival di Sanremo nacque nel 1951',a:true,exp:'La prima edizione si tenne il 29 gennaio 1951 nella sala da ballo del Casinò di Sanremo. Partecipavano tre soli cantanti: Nilla Pizzi, Achille Togliani e il Duo Fasano.'},
+  {q:'Caterina Caselli lasciò la carriera artistica per diventare produttrice discografica',a:true,exp:'Caselli fondò la Sugar Music, una delle etichette più importanti d\'Italia. Ha lanciato artisti come Elisa, Zucchero, Negramaro e Andrea Bocelli.'},
+  {q:'Fabrizio De André proveniva da una famiglia povera e dovette lottare per affermarsi',a:false,exp:'De André era figlio di un ricco industriale genovese. Scelse la musica per vocazione, non per necessità economica.'},
+  {q:'Il vero nome di Mina è Anna Maria Mazzini',a:true,exp:'Mina è il nome d\'arte di Anna Maria Mazzini, nata a Busto Arsizio il 25 marzo 1940.'},
+  {q:'Lucio Dalla era un chitarrista jazz prima di diventare cantante',a:false,exp:'Dalla era un clarinettista jazz, non un chitarrista. Suonava nei club jazz italiani prima di passare alla musica cantautorale.'},
+  {q:'Gino Paoli sopravvisse a un tentativo di suicidio negli anni \'60',a:true,exp:'Nel 1963 Paoli si sparò al petto. Sopravvisse grazie a un intervento chirurgico. La vicenda ispirò la canzone "Sassi" di Luigi Tenco.'},
+  {q:'"Caruso" di Lucio Dalla fu registrata a Napoli',a:false,exp:'"Caruso" fu composta e registrata a Sorrento, nell\'hotel dove il tenore Caruso aveva soggiornato. Dalla scrisse l\'intera canzone in una sola notte.'},
+  {q:'Paolo Conte era un avvocato prima di intraprendere la carriera di cantante',a:true,exp:'Conte esercitò la professione di avvocato ad Asti per anni mentre scriveva canzoni per altri artisti. "Azzurro" per Celentano (1968) fu il suo primo grande successo come autore.'},
+  {q:'Rita Pavone fu la prima italiana all\'Ed Sullivan Show',a:true,exp:'Rita Pavone si esibì all\'Ed Sullivan Show nel 1964, poche settimane dopo i Beatles. "La partita di pallone" entusiasmò il pubblico americano.'},
+];
+
+const QUIZ_ANNO=[
+  {q:'Prima edizione del Festival di Sanremo',y:1951,det:'Vince Nilla Pizzi con "Grazie dei fiori"'},
+  {q:'Domenico Modugno vince Sanremo con "Volare"',y:1958,det:'La canzone rivoluzionò il Festival e la musica italiana'},
+  {q:'Adriano Celentano fonda il Clan Celentano',y:1961,det:'Una delle prime etichette indipendenti italiane'},
+  {q:'Luigi Tenco si suicida a Sanremo',y:1967,det:'Il gesto avvenne la notte del 27 gennaio, dopo l\'eliminazione dalla gara'},
+  {q:'Battisti pubblica "Acqua Azzurra, Acqua Chiara"',y:1969,det:'È l\'inizio della stagione d\'oro Battisti-Mogol'},
+  {q:'Mina si ritira dalle esibizioni live',y:1978,det:'Il suo ultimo concerto fu al Bussoladomani di Viareggio'},
+  {q:'Dalla & De Gregori — tour "Banana Republic"',y:1979,det:'Il tour che infiammò l\'estate italiana divenne poi un disco dal vivo leggendario'},
+  {q:'De André viene sequestrato in Sardegna',y:1979,det:'Il sequestro durò quattro mesi; con lui c\'era anche la moglie Dori Ghezzi'},
+  {q:'Vasco Rossi pubblica "…Bollicine"',y:1983,det:'L\'album consolida Vasco come icona del rock italiano'},
+  {q:'Lucio Dalla pubblica "Caruso"',y:1986,det:'La canzone fu scritta in una notte nell\'hotel di Sorrento dove soggiornò Enrico Caruso'},
+  {q:'Muore Fabrizio De André a Milano',y:1999,det:'Si spense il 11 gennaio per un tumore ai polmoni'},
+];
+
+const CNODES=[
+  {id:'mina',n:'Mina',g:'cantante'},{id:'celentano',n:'Celentano',g:'cantante'},
+  {id:'battisti',n:'Battisti',g:'cantautore'},{id:'deandre',n:'De André',g:'cantautore'},
+  {id:'mogol',n:'Mogol',g:'paroliere'},{id:'dalla',n:'Dalla',g:'cantautore'},
+  {id:'venditti',n:'Venditti',g:'cantautore'},{id:'degregori',n:'De Gregori',g:'cantautore'},
+  {id:'morandi',n:'Morandi',g:'cantante'},{id:'pavone',n:'R.Pavone',g:'cantante'},
+  {id:'conte',n:'P.Conte',g:'paroliere'},{id:'pfm',n:'PFM',g:'gruppo'},
+  {id:'daniele',n:'P.Daniele',g:'cantautore'},{id:'cocciante',n:'Cocciante',g:'cantautore'},
+  {id:'baglioni',n:'Baglioni',g:'cantautore'},{id:'vanoni',n:'Vanoni',g:'cantante'},
+];
+const CLINKS=[
+  {s:'mogol',t:'battisti',tp:'scritto',lb:'Testi per Battisti (1967–1980), oltre 130 brani'},
+  {s:'battisti',t:'mina',tp:'scritto',lb:'Battisti scrisse per Mina "E penso a te" e altri'},
+  {s:'battisti',t:'vanoni',tp:'scritto',lb:'Battisti scrisse canzoni anche per Ornella Vanoni'},
+  {s:'conte',t:'celentano',tp:'scritto',lb:'Conte scrisse "Azzurro" per Celentano (1968)'},
+  {s:'deandre',t:'pfm',tp:'duetto',lb:'Tour 1979 "De André canta De André" con la PFM'},
+  {s:'dalla',t:'degregori',tp:'duetto',lb:'Tour "Banana Republic" (1979): uno dei più amati di sempre'},
+  {s:'dalla',t:'morandi',tp:'duetto',lb:'Duetto in "Vita" (1990)'},
+  {s:'dalla',t:'vanoni',tp:'duetto',lb:'"Insieme" (1984): duetto storico'},
+  {s:'celentano',t:'mina',tp:'duetto',lb:'Duetti storici degli anni \'70 e \'80'},
+  {s:'venditti',t:'degregori',tp:'etichetta',lb:'Condivisero la scena al Folkstudio di Roma negli anni \'70'},
+  {s:'baglioni',t:'cocciante',tp:'etichetta',lb:'Stessa scena pop romana anni \'70'},
+  {s:'daniele',t:'deandre',tp:'duetto',lb:'Amicizia e collaborazioni nel decennio \'80'},
+  {s:'morandi',t:'pavone',tp:'duetto',lb:'Duetti in programmi TV degli anni \'60'},
+];
+const GENRES={
+  name:'Musica Italiana',c:'#7D1B1B',children:[
+    {name:'Canzone Napoletana',c:'#A0540A',children:[
+      {name:'Tradizionale',c:'#C47020'},{name:'Moderna',c:'#C47020'},
+    ]},
+    {name:'Beat Italiano',c:'#1E6B1E',children:[
+      {name:'Gruppi Beat anni \'60',c:'#2E8B2E'},{name:'Ye-yé Femminile',c:'#2E8B2E'},
+    ]},
+    {name:'Cantautorato',c:'#1A3A6A',children:[
+      {name:'Scuola Genovese',c:'#2A5A9A',children:[
+        {name:'De André',c:'#3A7ABA'},{name:'Tenco',c:'#3A7ABA'},{name:'G. Paoli',c:'#3A7ABA'},
+      ]},
+      {name:'Scuola Romana',c:'#2A5A9A',children:[
+        {name:'De Gregori',c:'#3A7ABA'},{name:'Venditti',c:'#3A7ABA'},{name:'Dalla',c:'#3A7ABA'},
+      ]},
+    ]},
+    {name:'Pop Melodico',c:'#6A1A8A',children:[
+      {name:'Sanremo Pop',c:'#8A3AAA'},{name:'Ballata Romantica',c:'#8A3AAA'},
+    ]},
+    {name:'Italo Disco',c:'#0A5A6A',children:[
+      {name:'Euro Dance',c:'#1A7A8A'},{name:'Hi-NRG',c:'#1A7A8A'},
+    ]},
+    {name:'Rock Italiano',c:'#6A3A0A',children:[
+      {name:'Prog Rock (\'70)',c:'#8A5A2A'},{name:'New Wave (\'80)',c:'#8A5A2A'},
+    ]},
+  ]
+};
+
+// ── STATE ──────────────────────────────────────────────────────────────────────
+let score=0,cor=0,wrg=0,str=0,qMode='ind',curQ=null,hintsN=1,answered=false,cFilt='tutti';
+
+// ── NAV ──────────────────────────────────────────────────────────────────────
+function showPanel(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>{p.classList.remove('active');p.style.display='';});
+  document.getElementById('searchResults').classList.remove('active');
+  document.getElementById('searchResults').innerHTML='';
+  document.getElementById('globalSearchIn').value='';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='map') setTimeout(drawMap,80);
+  if(id==='gen') setTimeout(drawGenres,80);
+  if(id==='artisti') drawArtisti();
+  if(id==='sanremo') buildSanremo();
+  if(id==='accordi'){ accordiTab='chitarra'; renderAccordiTab(); }
+  if(id==='news' && !newsLoaded){ newsLoaded=true; initNews(); }
+  if(id==='radio' && !radioLoaded){ radioLoaded=true; buildRadioFilters(); loadRadio('',document.querySelector('.radio-filt')); }
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ── OTD ──────────────────────────────────────────────────────────────────────
+function buildOTD(){
+  document.getElementById('todayLbl').textContent=`${TD} ${MN[TM-1]} · Nella musica italiana`;
+  const evts=EVENTS.filter(e=>e.d===TD&&e.m===TM);
+  const out=document.getElementById('otdOut');
+  if(!evts.length){
+    out.innerHTML=`<div class="otd-none">Nessun evento registrato per il ${TD} ${MN[TM-1]}.</div>`;
+  } else {
+    out.innerHTML=cardBig(evts[0])+(evts.length>1?evts.slice(1).map(e=>cardMini(e)).join(''):'');
+  }
+}
+function badge(t){const m={nascita:'b-nascita 🎂 Nascita',morte:'b-morte 🕯️ Scomparsa',sanremo:'b-sanremo 🌹 Sanremo',canzone:'b-canzone 🎵 Canzone',album:'b-canzone 💿 Album',evento:'b-evento ⚡ Evento'};const p=(m[t]||'b-evento ⚡ Evento').split(' ');return`<span class="type-badge ${p[0]}">${p.slice(1).join(' ')}</span>`;}
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function cardBig(e){return`<div class="otd-card"><div class="otd-date">${e.d} ${MO[e.m-1]}</div><div class="otd-year">${e.y}</div>${badge(e.t)}<div class="otd-desc">${escHtml(e.desc)}</div>${e.det?`<div class="otd-detail">${escHtml(e.det)}</div>`:''}</div>`;}
+function cardMini(e){return`<div class="otd-mini"><span class="yr">${e.y}</span> — ${badge(e.t)} ${escHtml(e.desc)}</div>`;}
+
+// ── QUIZ ──────────────────────────────────────────────────────────────────────
+function setMode(m,btn){qMode=m;answered=false;hintsN=1;document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');nextQ();}
+function nextQ(){answered=false;const c=document.getElementById('quizOut');if(qMode==='ind')drawInd(c);else if(qMode==='tf')drawTF(c);else if(qMode==='yr')drawYr(c);else drawAudio(c);}
+
+function drawInd(c){
+  const art=INDOVINA[Math.floor(Math.random()*INDOVINA.length)];
+  curQ=art; hintsN=1;
+  const opts=[...INDOVINA.filter(a=>a.n!==art.n).sort(()=>Math.random()-.5).slice(0,3).map(a=>a.n),art.n].sort(()=>Math.random()-.5);
+  c.innerHTML=`<div class="quiz-card">
+    <div class="quiz-prog">Indovina l'artista · Usa meno indizi per più punti</div>
+    <div class="quiz-q">Chi è questo artista?</div>
+    <div id="hc"><div class="quiz-hint"><span class="hint-n">INDIZIO 1 &nbsp;</span>${art.h[0]}</div></div>
+    <div class="opts">${opts.map(o=>`<button class="opt-btn" onclick="checkInd(this,'${esc(o)}','${esc(art.n)}')">${o}</button>`).join('')}</div>
+    <div style="margin-top:12px"><button class="btn-s" id="hBtn" onclick="moreHint()">💡 Altro indizio (−${10*hintsN} pt)</button></div>
+    <div id="qr"></div></div>`;
+}
+function esc(s){return s.replace(/'/g,"\\'");}
+function moreHint(){
+  if(!curQ||answered)return;
+  if(hintsN>=curQ.h.length)return;
+  document.getElementById('hc').insertAdjacentHTML('beforeend',`<div class="quiz-hint"><span class="hint-n">INDIZIO ${hintsN+1} &nbsp;</span>${curQ.h[hintsN]}</div>`);
+  hintsN++;
+  const b=document.getElementById('hBtn');
+  if(hintsN>=curQ.h.length)b.disabled=true;
+  else b.textContent=`💡 Altro indizio (−${10*hintsN} pt)`;
+}
+function checkInd(btn,chosen,correct){
+  if(answered)return;answered=true;
+  document.querySelectorAll('.opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===correct)b.classList.add('correct');});
+  const pts=Math.max(10,40-10*(hintsN-1));
+  if(chosen===correct){btn.classList.add('correct');addPts(pts,true);document.getElementById('qr').innerHTML=`<div class="qr qr-ok">✅ Corretto! +${pts} punti<div class="qr-exp">Hai usato ${hintsN} indizio/i.</div></div><button class="btn-p" onclick="nextQ()">Prossima →</button>`;}
+  else{btn.classList.add('wrong');addPts(0,false);document.getElementById('qr').innerHTML=`<div class="qr qr-no">❌ Era <strong>${correct}</strong>.</div><button class="btn-p" onclick="nextQ()">Prossima →</button>`;}
+  document.getElementById('hc').insertAdjacentHTML('beforeend',curQ.h.slice(hintsN).map((h,i)=>`<div class="quiz-hint"><span class="hint-n">INDIZIO ${hintsN+1+i} &nbsp;</span>${h}</div>`).join(''));
+}
+
+function drawTF(c){
+  const q=VEROFALSO[Math.floor(Math.random()*VEROFALSO.length)];curQ=q;
+  c.innerHTML=`<div class="quiz-card"><div class="quiz-prog">Vero o Falso</div><div class="quiz-q">${q.q}</div>
+    <div class="tf-grid">
+      <button class="tf-btn tf-vero" data-v="true" onclick="checkTF(this,true)">✔ Vero</button>
+      <button class="tf-btn tf-falso" data-v="false" onclick="checkTF(this,false)">✘ Falso</button>
+    </div><div id="qr"></div></div>`;
+}
+function checkTF(btn,val){
+  if(answered)return;answered=true;
+  document.querySelectorAll('.tf-btn').forEach(b=>b.disabled=true);
+  if(val===curQ.a){btn.classList.add('correct');addPts(20,true);document.getElementById('qr').innerHTML=`<div class="qr qr-ok">✅ Corretto! +20 punti<div class="qr-exp">${curQ.exp}</div></div><button class="btn-p" onclick="nextQ()">Prossima →</button>`;}
+  else{btn.classList.add('wrong');document.querySelectorAll('.tf-btn').forEach(b=>{if((b.dataset.v==='true')===curQ.a)b.classList.add('correct');});addPts(0,false);document.getElementById('qr').innerHTML=`<div class="qr qr-no">❌ Era <strong>${curQ.a?'VERO':'FALSO'}</strong><div class="qr-exp">${curQ.exp}</div></div><button class="btn-p" onclick="nextQ()">Prossima →</button>`;}
+}
+
+function drawYr(c){
+  const q=QUIZ_ANNO[Math.floor(Math.random()*QUIZ_ANNO.length)];curQ=q;
+  c.innerHTML=`<div class="quiz-card"><div class="quiz-prog">Che Anno È? · Sposta il cursore e conferma</div>
+    <div class="quiz-q">${q.q}</div>
+    <div><div class="yr-display" id="yd">1974</div>
+    <input type="range" min="1920" max="2024" value="1974" id="ys" oninput="document.getElementById('yd').textContent=this.value"></div>
+    <button class="btn-p" onclick="checkYr()">Conferma →</button><div id="qr"></div></div>`;
+}
+
+// ── QUIZ AUDIO ────────────────────────────────────────────────────────────────
+let audioEl = null;
+
+function getAudioTracks() {
+  const tracks = [];
+  (ARTISTI_DATA.length ? ARTISTI_DATA : []).forEach(art => {
+    // Priorità: Deezer, poi Spotify
+    const sorgente = art.deezer_tracks || art.spotify_top_tracks || [];
+    sorgente.forEach(t => {
+      if (t.anteprima) tracks.push({
+        artista:   art.nome,
+        titolo:    t.titolo || t.title || '',
+        anteprima: t.anteprima,
+        copertina: t.copertina || '',
+      });
+    });
+  });
+  return tracks;
+}
+
+function drawAudio(c) {
+  const tracks = getAudioTracks();
+  if (tracks.length < 4) {
+    c.innerHTML = `<div class="quiz-card">
+      <div class="quiz-prog">Indovina la Canzone</div>
+      <div class="quiz-q">⚠️ Anteprime audio non disponibili.</div>
+      <div class="art-no-disc" style="margin-top:12px">
+        Esegui <strong>scraper_deezer.py</strong> poi <strong>incorpora_json.py</strong>
+        per abilitare questo quiz.
+      </div></div>`;
+    return;
+  }
+  const t = tracks[Math.floor(Math.random()*tracks.length)];
+  curQ = t; answered = false;
+  const wrong = tracks.filter(x=>x.artista!==t.artista)
+    .sort(()=>Math.random()-.5).slice(0,3).map(x=>x.artista);
+  const opts = [...wrong, t.artista].sort(()=>Math.random()-.5);
+
+  c.innerHTML = `<div class="quiz-card">
+    <div class="quiz-prog">🎧 Indovina la Canzone · Ascolta e scegli l'artista</div>
+    <div style="background:#FAF5EC;border:1px solid var(--parchment);border-radius:12px;padding:20px;margin-bottom:16px;text-align:center;">
+      ${t.copertina ? `<img src="${t.copertina}" style="width:80px;height:80px;border-radius:8px;margin-bottom:10px;object-fit:cover">` : ''}
+      <div style="font-family:'Josefin Sans',sans-serif;font-size:.72rem;letter-spacing:2px;color:var(--text-l);margin-bottom:10px">BRANO SCONOSCIUTO</div>
+      <audio id="audioPlayer" controls style="width:100%;accent-color:var(--burgundy)">
+        <source src="${t.url}" type="audio/mpeg">
+      </audio>
+    </div>
+    <div class="opts">${opts.map(o=>`<button class="opt-btn" onclick="checkAudio(this,'${esc(o)}','${esc(t.artista)}')">${o}</button>`).join('')}</div>
+    <div id="qr"></div>
+  </div>`;
+
+  // Avvia automaticamente
+  setTimeout(()=>{
+    const ap = document.getElementById('audioPlayer');
+    if(ap) ap.play().catch(()=>{});
+  }, 300);
+}
+
+function checkAudio(btn, chosen, correct) {
+  if(answered) return; answered = true;
+  if(audioEl) { audioEl.pause(); }
+  const ap = document.getElementById('audioPlayer');
+  if(ap) ap.pause();
+  document.querySelectorAll('.opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===correct)b.classList.add('correct');});
+  if(chosen===correct){
+    btn.classList.add('correct'); addPts(25,true);
+    document.getElementById('qr').innerHTML=`<div class="qr qr-ok">✅ Corretto! +25 punti<div class="qr-exp">"${curQ.titolo}" · ${curQ.anno}</div></div><button class="btn-p" onclick="nextQ()">Prossima →</button>`;
+  } else {
+    btn.classList.add('wrong'); addPts(0,false);
+    document.getElementById('qr').innerHTML=`<div class="qr qr-no">❌ Era <strong>${correct}</strong><div class="qr-exp">"${curQ.titolo}" · ${curQ.anno}</div></div><button class="btn-p" onclick="nextQ()">Prossima →</button>`;
+  }
+}
+function checkYr(){
+  if(answered)return;answered=true;
+  const ch=parseInt(document.getElementById('ys').value);
+  document.getElementById('ys').disabled=true;
+  const d=Math.abs(ch-curQ.y);
+  let pts=0,cls='',msg='';
+  if(d===0){pts=30;cls='qr-ok';msg='🎯 Anno esatto! +30 punti';}
+  else if(d<=2){pts=20;cls='qr-close';msg=`🔶 Quasi! ${d} anno/i di distanza. +20 punti`;}
+  else if(d<=5){pts=10;cls='qr-close';msg=`🔸 Vicino! ${d} anni di distanza. +10 punti`;}
+  else{cls='qr-no';msg=`❌ Era il <strong>${curQ.y}</strong>. Eri a ${d} anni.`;}
+  addPts(pts,d<=5);
+  document.getElementById('qr').innerHTML=`<div class="qr ${cls}">${msg}<div class="qr-exp">${curQ.det}</div></div><button class="btn-p" onclick="nextQ()">Prossima →</button>`;
+}
+
+function addPts(pts,ok){
+  score+=pts;ok?(cor++,str++):(wrg++,str=0);
+  document.getElementById('scoreBadge').textContent=`⭐ ${score} punti`;
+  document.getElementById('sC').textContent=cor;
+  document.getElementById('sW').textContent=wrg;
+  document.getElementById('sS').textContent=str;
+}
+
+// ── CURIOSITÀ ──────────────────────────────────────────────────────────────────
+function buildCuriosity(){
+  drawCuriosity();
+}
+function setFilt(f,btn){cFilt=f;document.querySelectorAll('.filt-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');drawCuriosity();}
+function drawCuriosity(){
+  const s=(document.getElementById('srchIn')?.value||'').toLowerCase();
+  const items=CURIOSITA.filter(c=>(cFilt==='tutti'||c.d===cFilt)&&(!s||c.a.toLowerCase().includes(s)||c.txt.toLowerCase().includes(s)||c.tag.toLowerCase().includes(s)));
+  document.getElementById('curGrid').innerHTML=items.map(c=>`<div class="c-card"><div class="c-artist">${c.a}</div><div class="c-decade">${c.d}</div><div class="c-text">${c.txt}</div><span class="c-tag">${c.tag}</span></div>`).join('');
+}
+
+// ── DARK MODE ─────────────────────────────────────────────────────────────────
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  const btn = document.getElementById('darkToggle');
+  btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+  localStorage.setItem('darkMode', document.body.classList.contains('dark') ? '1' : '0');
+}
+if (localStorage.getItem('darkMode') === '1') {
+  document.body.classList.add('dark');
+  document.getElementById('darkToggle').textContent = '☀️';
+}
+
+// ── MOBILE SIDEBAR ────────────────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+// ── GLOBAL SEARCH ─────────────────────────────────────────────────────────────
+function globalSearch(q) {
+  const sr = document.getElementById('searchResults');
+  const panels = document.querySelectorAll('.panel');
+  if (!q || q.length < 2) {
+    sr.classList.remove('active');
+    sr.innerHTML = '';
+    panels.forEach(p => p.style.display = '');
+    document.getElementById('globalSearch').style.borderBottom = '';
+    return;
+  }
+  sr.classList.add('active');
+  panels.forEach(p => p.style.display = 'none');
+
+  const kw = q.toLowerCase();
+  let html = '';
+
+  // Artisti
+  const arti = (ARTISTI_DATA.length ? ARTISTI_DATA : []).filter(a =>
+    a.nome.toLowerCase().includes(kw) || (a.bio_intro||'').toLowerCase().includes(kw)
+  ).slice(0,5);
+  if (arti.length) {
+    html += `<div class="sr-section"><div class="sr-section-title">🎤 Artisti</div>
+      ${arti.map(a=>`<div class="sr-item" onclick="apriArtista('${esc(a.nome)}')">
+        <strong>${a.nome}</strong> <em>· ${a.categoria||''} · ${(a.decenni||[]).map(d=>'anni '+d).join(', ')}</em>
+      </div>`).join('')}</div>`;
+  }
+
+  // Curiosità
+  const cur = CURIOSITA.filter(c =>
+    c.a.toLowerCase().includes(kw) || c.txt.toLowerCase().includes(kw) || c.tag.toLowerCase().includes(kw)
+  ).slice(0,4);
+  if (cur.length) {
+    html += `<div class="sr-section"><div class="sr-section-title">💡 Curiosità</div>
+      ${cur.map(c=>`<div class="sr-item">
+        <strong>${c.a}</strong> <em>· ${c.d}</em><br>
+        <span style="font-size:.88rem;color:var(--text)">${c.txt.substring(0,120)}…</span>
+      </div>`).join('')}</div>`;
+  }
+
+  // Brani top (da lastfm/spotify)
+  const brani = [];
+  (ARTISTI_DATA.length ? ARTISTI_DATA : []).forEach(a => {
+    (a.lastfm_top_tracks||a.spotify_top_tracks||[]).forEach(t => {
+      if (t.titolo && t.titolo.toLowerCase().includes(kw)) brani.push({titolo:t.titolo, artista:a.nome});
+    });
+  });
+  if (brani.length) {
+    html += `<div class="sr-section"><div class="sr-section-title">🎵 Brani</div>
+      ${brani.slice(0,5).map(b=>`<div class="sr-item" onclick="cercaTestoDiretto('${esc(b.titolo)}','${esc(b.artista)}')">
+        <strong>${b.titolo}</strong> <em>· ${b.artista}</em>
+      </div>`).join('')}</div>`;
+  }
+
+  // Eventi OTD
+  const evt = EVENTS.filter(e => e.desc.toLowerCase().includes(kw)).slice(0,3);
+  if (evt.length) {
+    html += `<div class="sr-section"><div class="sr-section-title">📅 Eventi</div>
+      ${evt.map(e=>`<div class="sr-item">
+        <strong>${e.y}</strong> <em>· ${e.desc}</em>
+      </div>`).join('')}</div>`;
+  }
+
+  if (!html) html = `<div class="sr-none">Nessun risultato per "<strong>${q}</strong>"</div>`;
+  sr.innerHTML = html;
+}
+
+function apriArtista(nome) {
+  document.getElementById('globalSearchIn').value = '';
+  globalSearch('');
+  const btn = document.querySelector('.nav-btn:nth-child(8)'); // artisti btn
+  showPanel('artisti', document.querySelectorAll('.nav-btn')[6] || btn);
+  setTimeout(() => {
+    document.getElementById('artSrch').value = nome;
+    drawArtisti();
+  }, 100);
+}
+
+function cercaTestoDiretto(titolo, artista) {
+  document.getElementById('globalSearchIn').value = '';
+  globalSearch('');
+  showPanel('testi', Array.from(document.querySelectorAll('.nav-btn')).find(b=>b.title==='Testi'));
+  document.getElementById('testiQ').value = `${titolo} ${artista}`;
+  cercaTesto();
+}
+
+// ── TESTI (Genius API via proxy) ───────────────────────────────────────────────
+const GENIUS_KEY = 'Ilxq6UWrPtUEpFmXdn9JWZYfzgEWgeKSIMVCx0uAZta0boPfwGsZ-q5SQQHvjJAe';
+
+async function cercaTesto() {
+  const q = document.getElementById('testiQ').value.trim();
+  if (!q) return;
+  const out = document.getElementById('testiOut');
+  out.innerHTML = `<div class="testi-status">🔍 Ricerca in corso…</div>`;
+
+  try {
+    // Genius API richiede CORS proxy in ambiente browser
+    const url = `https://api.genius.com/search?q=${encodeURIComponent(q)}`;
+    const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, {
+      headers: { 'Authorization': `Bearer ${GENIUS_KEY}` }
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    const hits = (data.response?.hits || [])
+      .filter(h => h.type === 'song')
+      .slice(0, 12);
+
+    if (!hits.length) {
+      out.innerHTML = `<div class="testi-status">Nessun risultato per "<strong>${q}</strong>"</div>`;
+      return;
+    }
+
+    out.innerHTML = `<div class="testi-results">
+      ${hits.map(h => {
+        const s = h.result;
+        return `<div class="testi-card" onclick="mostraTesto(${s.id},'${esc(s.title)}','${esc(s.primary_artist?.name||'')}','${esc(s.url||'')}')">
+          ${s.song_art_image_thumbnail_url ? `<img src="${s.song_art_image_thumbnail_url}" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:10px">` : ''}
+          <div class="testi-card-title">${s.title}</div>
+          <div class="testi-card-artist">${s.primary_artist?.name||''}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  } catch(e) {
+    out.innerHTML = `<div class="testi-status">❌ Errore: ${e.message}<br><small>Verifica la connessione internet.</small></div>`;
+  }
+}
+
+async function mostraTesto(id, titolo, artista, geniusUrl) {
+  const out = document.getElementById('testiOut');
+  out.innerHTML = `<button class="testi-back" onclick="cercaTesto()">← Torna ai risultati</button>
+    <div class="testi-status">⏳ Caricamento testo…</div>`;
+
+  try {
+    // Carica la pagina Genius tramite proxy e scrapa il testo
+    const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(geniusUrl)}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const html = await r.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    // Genius usa containers specifici per i testi
+    let testo = '';
+    const containers = doc.querySelectorAll('[data-lyrics-container="true"]');
+    containers.forEach(el => {
+      el.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+      testo += el.innerText || el.textContent;
+      testo += '\n\n';
+    });
+
+    if (!testo.trim()) {
+      testo = 'Testo non disponibile per questa canzone.\nProva ad aprire la pagina direttamente su Genius.';
+    }
+
+    out.innerHTML = `
+      <button class="testi-back" onclick="cercaTesto()">← Torna ai risultati</button>
+      <div class="testi-box">
+        <div class="testi-box-title">${titolo}</div>
+        <div class="testi-box-artist">${artista}</div>
+        <div class="testi-testo">${testo.trim()}</div>
+        <div class="testi-copyright">
+          Testo fornito da <a href="${geniusUrl}" target="_blank" style="color:var(--gold)">Genius</a> · 
+          Tutti i diritti riservati agli autori.
+        </div>
+      </div>`;
+  } catch(e) {
+    out.innerHTML = `<button class="testi-back" onclick="cercaTesto()">← Torna ai risultati</button>
+      <div class="testi-status">❌ Impossibile caricare il testo.<br>
+      <a href="${geniusUrl}" target="_blank" style="color:var(--gold)">Apri su Genius →</a></div>`;
+  }
+}
+
+// ── SANREMO ───────────────────────────────────────────────────────────────────
+
+const SANREMO = [
+  {a:1951,v:'Nilla Pizzi',c:'Grazie dei fiori',q:'Prima edizione: tre soli cantanti sul palco del Casinò. Nilla Pizzi vinse con due canzoni su tre in gara.'},
+  {a:1952,v:'Nilla Pizzi',c:'Vola colomba',q:'Nilla Pizzi vince per il secondo anno consecutivo — record ancora imbattuto. La canzone diventò quasi un inno nazionale.'},
+  {a:1953,v:'Carla Boni',c:'Viale d\'autunno',q:'Prima edizione trasmessa in diretta RAI. Il Festival inizia a diventare un fenomeno televisivo di massa.'},
+  {a:1954,v:'Gino Latilla',c:'Tutte le mamme',q:''},
+  {a:1955,v:'Claudio Villa',c:'Buongiorno tristezza',q:''},
+  {a:1956,v:'Franca Raimondi',c:'Aprite le finestre',q:'Prima edizione a essere trasmessa anche in televisione in diretta. La Raimondi era praticamente sconosciuta.'},
+  {a:1957,v:'Nunzio Gallo',c:'Corde della mia chitarra',q:''},
+  {a:1958,v:'Domenico Modugno',c:'Nel blu dipinto di blu',q:'La canzone rivoluzionò Sanremo e la musica italiana. In America divenne "Volare" e vinse il Grammy. Frank Sinatra la definì "la più bella canzone che abbia mai sentito".'},
+  {a:1959,v:'Domenico Modugno',c:'Piove (Ciao ciao bambina)',q:'Secondo trionfo di Modugno, che domina il Festival per due anni consecutivi.'},
+  {a:1960,v:'Tony Dallara',c:'Romantica',q:''},
+  {a:1961,v:'Betty Curtis',c:'Al di là',q:'La canzone fu poi cantata da Emilio Pericoli e rappresentò l\'Italia all\'Eurovision.'},
+  {a:1962,v:'Claudio Villa',c:'Addio addio',q:''},
+  {a:1963,v:'Gigliola Cinquetti',c:'Non ho l\'età',q:'Cinquetti aveva solo 16 anni. Vincerà anche l\'Eurovision. È la più giovane vincitrice nella storia del Festival.'},
+  {a:1964,v:'Gigliola Cinquetti',c:'Non ho l\'età',q:'Primo anno in cui il Festival si svolge al Teatro Ariston, sede storica ancora oggi.'},
+  {a:1965,v:'Bobby Solo',c:'Se piangi se ridi',q:''},
+  {a:1966,v:'Domenico Modugno',c:'Dio come ti amo',q:'Terza vittoria di Modugno a Sanremo.'},
+  {a:1967,v:'Claudio Villa',c:'Non pensare a me',q:'La notte del 27 gennaio Luigi Tenco si tolse la vita dopo l\'eliminazione. Il gesto scosse profondamente il mondo musicale italiano.'},
+  {a:1968,v:'Sergio Endrigo',c:'Canzone per te',q:'Anno della contestazione: il pubblico fischiò i cantanti dal vivo. Inaugurazione della tradizione dei "big" e delle "proposte".'},
+  {a:1969,v:'Bobby Solo',c:'Zingara',q:''},
+  {a:1970,v:'Celentano e Claudia Mori',c:'Chi non lavora non fa l\'amore',q:'Celentano vince con la moglie Claudia Mori in una delle performance più iconiche della storia del Festival.'},
+  {a:1971,v:'Nicola Di Bari',c:'Il cuore è uno zingaro',q:''},
+  {a:1972,v:'Nicola Di Bari',c:'I giorni dell\'arcobaleno',q:'Secondo trionfo consecutivo per Di Bari.'},
+  {a:1973,v:'Peppino di Capri',c:'Un grande amore e niente più',q:''},
+  {a:1974,v:'Iva Zanicchi',c:'Ciao cara come stai',q:''},
+  {a:1975,v:'Decibel',c:'Contessa',q:''},
+  {a:1976,v:'Peppino di Capri',c:'Non lo faccio più',q:''},
+  {a:1977,v:'Homo Sapiens',c:'Bella da morire',q:''},
+  {a:1978,v:'Matia Bazar',c:'…E dirsi ciao',q:''},
+  {a:1979,v:'Mino Vergnaghi',c:'Cosa sei',q:''},
+  {a:1980,v:'Toto Cutugno',c:'Solo noi',q:''},
+  {a:1981,v:'Alice e Franco Battiato',c:'Per Elisa',q:'Una delle vittorie più inaspettate: Battiato, artista d\'avanguardia, vince con una canzone pop. Alice diventa famosa in tutta Europa.'},
+  {a:1982,v:'Riccardo Fogli',c:'Storie di tutti i giorni',q:''},
+  {a:1983,v:'Tiziana Rivale',c:'Sarà quel che sarà',q:'Vasco Rossi partecipa con "Vita spericolata" arrivando penultimo. La canzone diventerà il suo inno.'},
+  {a:1984,v:'Al Bano e Romina Power',c:'Ci sarà',q:''},
+  {a:1985,v:'Ricchi e Poveri',c:'Se m\'innamoro',q:''},
+  {a:1986,v:'Eros Ramazzotti',c:'Adesso tu',q:'Ramazzotti aveva già vinto nella categoria giovani nel 1984. È uno dei pochi a trionfare in entrambe le categorie.'},
+  {a:1987,v:'Gianni Morandi, Enrico Ruggeri, Umberto Tozzi',c:'Si può dare di più',q:'Tre generazioni a confronto. La canzone diventa un manifesto di solidarietà e viene ancora cantata agli eventi benefici.'},
+  {a:1988,v:'Massimo Ranieri',c:'Perdere l\'amore',q:'Una delle vittorie più convincenti degli anni \'80. Il brano vinse anche l\'Eurovision.'},
+  {a:1989,v:'Anna Oxa e Fausto Leali',c:'Ti lascerò',q:'Mia Martini partecipa con "Almeno tu nell\'universo" e riceve una standing ovation dopo anni di emarginazione.'},
+  {a:1990,v:'Toto Cutugno',c:'Insieme: 1992',q:'Cutugno vince anche l\'Eurovision con questa canzone. Il testo parla dell\'unificazione europea.'},
+  {a:1991,v:'Riccardo Cocciante',c:'Se stiamo insieme',q:''},
+  {a:1992,v:'Luca Barbarossa',c:'Portami a ballare',q:''},
+  {a:1993,v:'Enrico Ruggeri',c:'Il portiere di notte',q:''},
+  {a:1994,v:'Alexia',c:'Il cuore è uno zingaro',q:''},
+  {a:1995,v:'Giorgia',c:'Come saprei',q:'Giorgia esegue una delle note più alte mai sentite al Festival. La sua voce lascia il pubblico senza fiato.'},
+  {a:1996,v:'Ron',c:'Vorrei incontrarti fra cent\'anni',q:''},
+  {a:1997,v:'Jalisse',c:'Fiumi di parole',q:'Vittoria a sorpresa per un duo semi-sconosciuto. Rappresenteranno l\'Italia all\'Eurovision.'},
+  {a:1998,v:'Annalisa Minetti',c:'Senza te o con te',q:'Annalisa Minetti è non vedente. La sua vittoria commuove tutto il paese.'},
+  {a:1999,v:'Anna Oxa',c:'Senza pietà',q:''},
+  {a:2000,v:'Elisa',c:'Luce (Tramonti a Nord Est)',q:'Elisa vince con una canzone parzialmente in inglese, cosa insolita per Sanremo. Inizia la carriera di una delle cantanti più apprezzate d\'Italia.'},
+];
+
+let sanremoFiltro = 'tutti';
+
+function buildSanremo() {
+  const decenni = ['tutti','\'50','\'60','\'70','\'80','\'90','\'00'];
+  document.getElementById('sanremoFilters').innerHTML = decenni.map(d =>
+    `<button class="sanremo-decade ${d==='tutti'?'active':''}" onclick="setSanremoFiltro('${d}',this)">${d==='tutti'?'Tutti':d}</button>`
+  ).join('');
+  drawSanremo();
+}
+
+function setSanremoFiltro(f, btn) {
+  sanremoFiltro = f;
+  document.querySelectorAll('.sanremo-decade').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  drawSanremo();
+}
+
+function drawSanremo() {
+  let lista = SANREMO;
+  if (sanremoFiltro !== 'tutti') {
+    const decade = parseInt(sanremoFiltro.replace("'","")) + 1900;
+    lista = SANREMO.filter(s => s.a >= decade && s.a < decade + 10);
+  }
+  document.getElementById('sanremoGrid').innerHTML = lista.map(s => `
+    <div class="sanremo-card">
+      <div class="sanremo-anno">${s.a}</div>
+      <div class="sanremo-canzone">"${escHtml(s.c)}"</div>
+      <div class="sanremo-vincitore">🏆 ${escHtml(s.v)}</div>
+      ${s.q ? `<div class="sanremo-curiosita">${escHtml(s.q)}</div>` : ''}
+    </div>`).join('');
+}
+
+// ── ACCORDI ───────────────────────────────────────────────────────────────────
+
+let accordiTab = 'chitarra';
+
+function setAccordiTab(tab, btn) {
+  accordiTab = tab;
+  document.querySelectorAll('.accordi-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAccordiTab();
+}
+
+function renderAccordiTab() {
+  const isChitarra = accordiTab === 'chitarra';
+  const strumento = isChitarra ? 'chitarra' : 'pianoforte';
+  const icon = isChitarra ? '🎸' : '🎹';
+  const site = isChitarra
+    ? 'Ultimate Guitar'
+    : 'Piano Chord Chart · Pianu';
+
+  const suggeriti = [
+    ['Azzurro', 'Azzurro Celentano'],
+    ['Volare', 'Volare Modugno'],
+    ['Caruso', 'Caruso Lucio Dalla'],
+    ['La canzone del sole', 'La canzone del sole Battisti'],
+    ['Generale', 'Generale De Gregori'],
+    ['Vita spericolata', 'Vita spericolata Vasco Rossi'],
+    ['Il cielo in una stanza', 'Il cielo in una stanza Gino Paoli'],
+    ['Almeno tu nell\'universo', 'Almeno tu nell universo Mia Martini'],
+  ];
+
+  const artisti = [
+    'Lucio Battisti','Fabrizio De André','Mina','Vasco Rossi','Lucio Dalla',
+    'Adriano Celentano','Francesco De Gregori','Antonello Venditti','Pino Daniele',
+    'Franco Battiato','Zucchero','Eros Ramazzotti','Laura Pausini','Gianni Morandi',
+    'Claudio Baglioni','Paolo Conte','Francesco Guccini','Giorgio Gaber',
+    'Rino Gaetano','Carmen Consoli','Ligabue','883','Nomadi','I Pooh'
+  ];
+
+  document.getElementById('accordiTabContent').innerHTML = `
+    <div class="accordi-note">
+      ${icon} Cerca gli accordi per <strong>${strumento}</strong>.
+      ${isChitarra
+        ? 'I risultati si apriranno su <strong>Ultimate Guitar</strong>, il più grande archivio mondiale di tablature.'
+        : 'I risultati si apriranno su <strong>Pianu</strong> e altre risorse per accordi di pianoforte.'}
+    </div>
+    <div class="accordi-search">
+      <input class="accordi-input" id="accordiQ" placeholder="Es: Azzurro, Volare, Battisti…" onkeydown="if(event.key==='Enter')cercaAccordi()">
+      <button class="accordi-btn" onclick="cercaAccordi()">${icon} Cerca</button>
+    </div>
+    <div class="accordi-suggeriti">
+      <span style="font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-ll);align-self:center;">Suggeriti:</span>
+      ${suggeriti.map(([label,q]) => `<button class="accordi-sug" onclick="cercaAccordiDiretti('${q.replace(/'/g,"\\'")}')">${label}</button>`).join('')}
+    </div>
+    <div id="accordiOut"></div>
+    <div style="margin-top:28px;">
+      <div style="font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-ll);margin-bottom:12px;">Sfoglia per artista</div>
+      <div class="accordi-artisti">
+        ${artisti.map(a => `<button class="accordi-artista-btn" onclick="cercaAccordiDiretti('${a.replace(/'/g,"\\'")}')">${icon} ${a}</button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function cercaAccordi() {
+  const q = (document.getElementById('accordiQ')?.value || '').trim();
+  if (!q) return;
+  cercaAccordiDiretti(q);
+}
+
+function cercaAccordiDiretti(query) {
+  const el = document.getElementById('accordiQ');
+  if (el) el.value = query;
+  const encoded = encodeURIComponent(query);
+
+  let url, siteName;
+  if (accordiTab === 'chitarra') {
+    url = `https://www.ultimate-guitar.com/search.php?search_type=title&value=${encoded}`;
+    siteName = 'Ultimate Guitar';
+  } else {
+    // Per piano: Pianu ha una ricerca decente, in alternativa musescore
+    url = `https://pianu.com/song-search?q=${encoded}`;
+    siteName = 'Pianu (Piano)';
+  }
+
+  const out = document.getElementById('accordiOut');
+  if (!out) return;
+  out.innerHTML = `
+    <div class="accordi-link-box">
+      <div class="accordi-link-title">"${escHtml(query)}"</div>
+      <div class="accordi-link-sub">
+        Clicca per vedere gli accordi disponibili su ${siteName}.
+      </div>
+      <a class="accordi-link-btn" href="${url}" target="_blank" rel="noopener">
+        ${accordiTab === 'chitarra' ? '🎸' : '🎹'} Apri su ${siteName} →
+      </a>
+      ${accordiTab === 'piano' ? `
+      <div style="margin-top:12px;">
+        <a class="accordi-link-btn" style="background:var(--burg-mid);margin-top:8px;" href="https://www.musescore.com/sheetmusic?text=${encoded}&instrumentation=piano" target="_blank" rel="noopener">
+          🎹 Cerca anche su MuseScore →
+        </a>
+      </div>` : ''}
+    </div>`;
+}
+
+function buildAccordiArtisti() {
+  renderAccordiTab();
+}
+
+// ── COLLAB MAP ──────────────────────────────────────────────────────────────────
+function drawMap(){
+  const svg=d3.select('#collabSvg');svg.selectAll('*').remove();
+  const el=document.getElementById('collabSvg');
+  const W=el.clientWidth,H=el.clientHeight;
+  const tip=document.getElementById('c-tip');
+  const gc={cantante:'#7D1B1B',cantautore:'#1A3A6A',paroliere:'#B8860B',gruppo:'#1E3A1E'};
+  const lc={scritto:'#7D1B1B',duetto:'#B8860B',etichetta:'#1E3A1E'};
+  const nodes=CNODES.map(n=>({...n}));
+  const links=CLINKS.map(l=>({source:l.s,target:l.t,type:l.tp,label:l.lb}));
+  const sim=d3.forceSimulation(nodes)
+    .force('link',d3.forceLink(links).id(d=>d.id).distance(95))
+    .force('charge',d3.forceManyBody().strength(-240))
+    .force('center',d3.forceCenter(W/2,H/2))
+    .force('collision',d3.forceCollide(38));
+  const g=svg.append('g');
+  svg.call(d3.zoom().scaleExtent([0.35,2.8]).on('zoom',e=>g.attr('transform',e.transform)));
+  const link=g.append('g').selectAll('line').data(links).enter().append('line')
+    .attr('stroke',d=>lc[d.type]||'#999').attr('stroke-width',d=>d.type==='duetto'?2.5:1.8)
+    .attr('stroke-opacity',.55).attr('stroke-dasharray',d=>d.type==='etichetta'?'5,4':null);
+  const node=g.append('g').selectAll('g').data(nodes).enter().append('g')
+    .call(d3.drag()
+      .on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;})
+      .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y;})
+      .on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}));
+  node.append('circle').attr('r',d=>d.g==='paroliere'?19:24)
+    .attr('fill',d=>gc[d.g]||'#888').attr('stroke','white').attr('stroke-width',2.5)
+    .on('mouseover',(e,d)=>{
+      const ml=links.filter(l=>l.source.id===d.id||l.target.id===d.id);
+      tip.style.opacity=1;tip.innerHTML=`<strong>${d.n}</strong><br><em>${d.g}</em><br><br>${ml.map(l=>l.label).join('<br>')}`;
+    })
+    .on('mousemove',e=>{tip.style.left=(e.clientX+12)+'px';tip.style.top=(e.clientY-30)+'px';})
+    .on('mouseout',()=>tip.style.opacity=0);
+  node.append('text').attr('text-anchor','middle').attr('dy','4px')
+    .attr('fill','white').attr('font-family','Josefin Sans, sans-serif')
+    .attr('font-size','10px').attr('font-weight','600').attr('pointer-events','none')
+    .text(d=>d.n);
+  sim.on('tick',()=>{
+    link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+    node.attr('transform',d=>`translate(${d.x},${d.y})`);
+  });
+}
+
+// ── GENRE TREE ──────────────────────────────────────────────────────────────────
+function drawGenres(){
+  const svg=d3.select('#genreSvg');svg.selectAll('*').remove();
+  const el=document.getElementById('genreSvg');
+  const W=el.clientWidth,H=el.clientHeight;
+  const mg={t:30,r:130,b:30,l:150};
+  const root=d3.hierarchy(GENRES);
+  d3.tree().size([H-mg.t-mg.b,W-mg.l-mg.r])(root);
+  const g=svg.append('g').attr('transform',`translate(${mg.l},${mg.t})`);
+  svg.call(d3.zoom().scaleExtent([.4,2.2]).on('zoom',e=>g.attr('transform',e.transform)));
+  g.selectAll('.g-link').data(root.links()).enter().append('path')
+    .attr('class','g-link').attr('d',d3.linkHorizontal().x(d=>d.y).y(d=>d.x));
+  const nd=g.selectAll('g').data(root.descendants()).enter().append('g')
+    .attr('transform',d=>`translate(${d.y},${d.x})`);
+  nd.append('rect').attr('x',-52).attr('y',-14).attr('width',104).attr('height',28)
+    .attr('rx',8).attr('fill',d=>d.data.c||'#7D1B1B').attr('stroke','white').attr('stroke-width',1.5)
+    .attr('opacity',d=>Math.max(.65,1-d.depth*.09));
+  nd.append('text').attr('text-anchor','middle').attr('dy','4px')
+    .attr('fill','white').attr('pointer-events','none')
+    .attr('font-family','Josefin Sans, sans-serif')
+    .attr('font-weight','600')
+    .attr('font-size',d=>d.depth===0?'13px':d.depth===1?'11px':'10px')
+    .text(d=>d.data.name);
+}
+
+
+// ── SPOTIFY & AUDIO QUIZ ─────────────────────────────────────────────────────
+
+let currentAudio = null;
+
+function stopAudio() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  document.querySelectorAll('.sp-play').forEach(b => b.classList.remove('playing'));
+  document.querySelectorAll('.audio-play-btn').forEach(b => b.textContent = '▶');
+}
+
+function playPreview(url, btn) {
+  stopAudio();
+  if (!url) return;
+  currentAudio = new Audio(url);
+  currentAudio.volume = 0.8;
+  currentAudio.play();
+  btn.classList.add('playing');
+  currentAudio.onended = () => { btn.classList.remove('playing'); currentAudio = null; };
+}
+
+// Aggiunge top tracks alla modal artista
+function spTracksHtml(art) {
+  const tracks = art.top_tracks || [];
+  if (!tracks.length) return '';
+  const rows = tracks.map(t => {
+    const cover = t.copertina
+      ? `<img class="sp-cover" src="${t.copertina}" onerror="this.style.display='none'">`
+      : `<div class="sp-cover-ph">♪</div>`;
+    const playBtn = t.anteprima
+      ? `<button class="sp-play" onclick="event.stopPropagation();playPreview('${t.anteprima}',this)" title="Ascolta 30 sec">▶</button>`
+      : `<span class="sp-no-preview">—</span>`;
+    return `<div class="sp-track">
+      ${cover}
+      <div class="sp-info">
+        <div class="sp-title">${t.titolo}</div>
+        <div class="sp-album">${t.album}${t.anno?' · '+t.anno:''}</div>
+      </div>
+      ${playBtn}
+    </div>`;
+  }).join('');
+  return `<div class="sp-tracks">${rows}</div>`;
+}
+
+// ── QUIZ AUDIO ────────────────────────────────────────────────────────────────
+
+function drawAudio(c) {
+  // Raccoglie tutti i brani con anteprima da tutti gli artisti
+  const pool = [];
+  (ARTISTI_DATA.length ? ARTISTI_DATA : []).forEach(art => {
+    (art.top_tracks || []).forEach(t => {
+      if (t.anteprima) pool.push({ ...t, artista: art.nome });
+    });
+  });
+
+  if (pool.length < 4) {
+    c.innerHTML = `<div class="quiz-card">
+      <div class="quiz-q">🎵 Nessuna anteprima audio disponibile.</div>
+      <div class="quiz-hint" style="margin-top:12px">
+        <span class="hint-n">COME FARE &nbsp;</span>
+        Esegui <strong>scraper_spotify.py</strong> poi <strong>incorpora_json.py</strong>
+        per aggiungere anteprime audio da Spotify.
+      </div>
+    </div>`;
+    return;
+  }
+
+  // Scegli brano casuale
+  const track = pool[Math.floor(Math.random() * pool.length)];
+  curQ = track;
+
+  // Genera 3 artisti sbagliati
+  const altriFa = [...new Set(pool.map(t => t.artista))]
+    .filter(a => a !== track.artista)
+    .sort(() => Math.random() - .5).slice(0, 3);
+  const opzioni = [...altriFa, track.artista].sort(() => Math.random() - .5);
+
+  c.innerHTML = `<div class="quiz-card">
+    <div class="quiz-prog">🎵 Indovina la Canzone · Ascolta e scegli l'artista</div>
+    <div class="audio-player-wrap">
+      ${track.copertina ? `<img class="audio-cover" src="${track.copertina}" alt="">` : ''}
+      <div class="audio-label" style="margin-top:10px">Di chi è questa canzone?</div>
+      <div class="audio-controls">
+        <button class="audio-play-btn" id="audioBtn" onclick="toggleAudio('${track.anteprima}',this)">▶</button>
+      </div>
+      <div class="audio-label" style="margin-top:8px;font-size:.65rem">clicca ▶ per ascoltare 30 secondi</div>
+    </div>
+    <div class="opts">${opzioni.map(o =>
+      `<button class="opt-btn" onclick="checkAudio(this,'${esc(o)}','${esc(track.artista)}')">${o}</button>`
+    ).join('')}</div>
+    <div id="qr"></div>
+  </div>`;
+}
+
+function toggleAudio(url, btn) {
+  if (currentAudio && !currentAudio.paused) {
+    stopAudio(); btn.textContent = '▶';
+  } else {
+    stopAudio();
+    currentAudio = new Audio(url);
+    currentAudio.volume = 0.8;
+    currentAudio.play();
+    btn.textContent = '⏸';
+    currentAudio.onended = () => { btn.textContent = '▶'; currentAudio = null; };
+  }
+}
+
+function checkAudio(btn, chosen, correct) {
+  if (answered) return; answered = true;
+  stopAudio();
+  document.querySelectorAll('.opt-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('correct');
+  });
+  if (chosen === correct) {
+    btn.classList.add('correct'); addPts(25, true);
+    document.getElementById('qr').innerHTML =
+      `<div class="qr qr-ok">✅ Corretto! +25 punti<div class="qr-exp">Era "${curQ.titolo}" di ${correct}</div></div>
+       <button class="btn-p" onclick="nextQ()">Prossima →</button>`;
+  } else {
+    btn.classList.add('wrong'); addPts(0, false);
+    document.getElementById('qr').innerHTML =
+      `<div class="qr qr-no">❌ Era <strong>${correct}</strong> — "${curQ.titolo}"</div>
+       <button class="btn-p" onclick="nextQ()">Prossima →</button>`;
+  }
+}
+
+// ── RADIO ─────────────────────────────────────────────────────────────────────
+
+const RADIO_FILTERS = [
+  { label:'Tutte',     tag:''             },
+  { label:'Pop',       tag:'pop'          },
+  { label:'Rock',      tag:'rock'         },
+  { label:'Jazz',      tag:'jazz'         },
+  { label:'Classica',  tag:'classical'    },
+  { label:'Folk',      tag:'folk'         },
+  { label:'Anni \'60', tag:'60s'          },
+  { label:'Anni \'70', tag:'70s'          },
+  { label:'Anni \'80', tag:'80s'          },
+];
+
+let radioAudio   = null;
+let radioLoaded  = false;
+let radioCache   = {};
+let currentRadioCard = null;
+
+function buildRadioFilters() {
+  document.getElementById('radioFilters').innerHTML = RADIO_FILTERS.map((f,i) =>
+    `<button class="radio-filt ${i===0?'active':''}" onclick="loadRadio('${f.tag}',this)">${f.label}</button>`
+  ).join('');
+}
+
+async function loadRadio(tag, btn) {
+  document.querySelectorAll('.radio-filt').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const grid = document.getElementById('radioGrid');
+
+  if (!navigator.onLine) {
+    grid.innerHTML = `<div class="radio-status">✈️ Sei offline — la radio richiede internet.</div>`;
+    return;
+  }
+
+  if (radioCache[tag]) { renderRadio(radioCache[tag]); return; }
+
+  grid.innerHTML = `<div class="radio-status">⏳ Caricamento stazioni…</div>`;
+
+  try {
+    // Radio Browser API — cerca stazioni italiane per tag
+    const base = 'https://de1.api.radio-browser.info/json/stations';
+    let url;
+    if (tag) {
+      url = `${base}/bytag/${encodeURIComponent(tag)}?countrycode=IT&limit=40&hidebroken=true&order=votes&reverse=true`;
+    } else {
+      url = `${base}/bycountrycodeexact/IT?limit=60&hidebroken=true&order=votes&reverse=true`;
+    }
+    const r = await fetch(url, { headers:{'User-Agent':'MusicaItaliana/1.0'} });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const stazioni = await r.json();
+    radioCache[tag] = stazioni;
+    renderRadio(stazioni);
+  } catch(e) {
+    console.error('Radio Browser:', e);
+    grid.innerHTML = `<div class="radio-status">❌ Impossibile caricare le stazioni.<br><small>${e.message}</small></div>`;
+  }
+}
+
+function renderRadio(stazioni) {
+  const grid = document.getElementById('radioGrid');
+  if (!stazioni.length) {
+    grid.innerHTML = `<div class="radio-status">Nessuna stazione trovata per questo filtro.</div>`;
+    return;
+  }
+  grid.innerHTML = stazioni.map(s => {
+    const logo = s.favicon
+      ? `<img class="radio-logo" src="${s.favicon}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+        + `<div class="radio-logo-ph" style="display:none">📻</div>`
+      : `<div class="radio-logo-ph">📻</div>`;
+    const genre = (s.tags||'').split(',').slice(0,2).join(', ');
+    const id = encodeURIComponent(s.stationuuid);
+    return `<div class="radio-card" id="rc-${id}" onclick="playRadio(${JSON.stringify(s.url_resolved||s.url)},${JSON.stringify(s.name)},${JSON.stringify(s.favicon||'')},this)">
+      ${logo}
+      <div class="radio-info">
+        <div class="radio-name">${s.name}</div>
+        ${genre ? `<div class="radio-genre">${genre}</div>` : ''}
+      </div>
+      <button class="radio-play-btn" onclick="event.stopPropagation();playRadio(${JSON.stringify(s.url_resolved||s.url)},${JSON.stringify(s.name)},${JSON.stringify(s.favicon||'')},this.closest('.radio-card'))">▶</button>
+    </div>`;
+  }).join('');
+}
+
+function playRadio(url, nome, favicon, card) {
+  stopRadio();
+  radioAudio = new Audio(url);
+  radioAudio.volume = parseFloat(document.getElementById('rp-vol').value);
+  radioAudio.play().catch(e => console.warn('Radio play error:', e));
+
+  // Aggiorna card attiva
+  currentRadioCard = card;
+  card.classList.add('playing');
+  const btn = card.querySelector('.radio-play-btn');
+  if (btn) { btn.textContent = '⏸'; btn.classList.add('active'); }
+
+  // Aggiorna player bar
+  document.getElementById('rpName').textContent = nome;
+  const bar = document.getElementById('radioPlayerBar');
+  bar.classList.add('visible');
+
+  // Aggiorna logo nel player bar
+  const ph = document.getElementById('rp-logo-ph');
+  if (favicon) {
+    ph.innerHTML = `<img src="${favicon}" style="width:100%;height:100%;object-fit:contain;border-radius:6px;background:var(--parchment-l);padding:3px" onerror="this.parentElement.textContent='📻'">`;
+  } else {
+    ph.textContent = '📻';
+  }
+
+  radioAudio.onerror = () => {
+    stopRadio();
+    document.getElementById('radioGrid').insertAdjacentHTML('afterbegin',
+      `<div class="radio-status" style="color:#B03030;padding:12px 20px;margin-bottom:12px;background:#F8EAEA;border-radius:8px;border-left:3px solid #B03030">
+        ⚠️ Stream non disponibile per questa stazione. Prova un'altra.
+      </div>`);
+  };
+}
+
+function stopRadio() {
+  if (radioAudio) { radioAudio.pause(); radioAudio = null; }
+  if (currentRadioCard) {
+    currentRadioCard.classList.remove('playing');
+    const btn = currentRadioCard.querySelector('.radio-play-btn');
+    if (btn) { btn.textContent = '▶'; btn.classList.remove('active'); }
+    currentRadioCard = null;
+  }
+  document.getElementById('radioPlayerBar').classList.remove('visible');
+}
+
+function setRadioVol(v) {
+  if (radioAudio) radioAudio.volume = parseFloat(v);
+}
+
+// ── NOTIZIE ───────────────────────────────────────────────────────────────────
+
+let NEWS_DATA = {};   // popolato dal JSON incorporato
+let newsLoaded = false;
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'});
+}
+
+function loadNews(query, btn) {
+  document.querySelectorAll('.news-query-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const cat = NEWS_DATA[query];
+  if (cat && cat.articoli && cat.articoli.length) {
+    renderNews(cat.articoli);
+  } else {
+    document.getElementById('newsGrid').innerHTML =
+      `<div class="news-status">
+        📭 Nessuna notizia per questa categoria.<br>
+        <small style="font-size:.85rem;margin-top:8px;display:block">
+          Esegui <strong>scraper_notizie.py</strong> per scaricare le ultime notizie,<br>
+          poi riesegui <strong>incorpora_json.py</strong>.
+        </small>
+      </div>`;
+  }
+}
+
+function renderNews(articoli) {
+  const grid = document.getElementById('newsGrid');
+  if (!articoli.length) { grid.innerHTML = `<div class="news-status">Nessuna notizia trovata.</div>`; return; }
+  grid.innerHTML = articoli.map(a => {
+    const img = a.immagine
+      ? `<img class="news-img" src="${a.immagine}" alt="" onerror="this.style.display='none'">`
+      : `<div class="news-img-ph">📰</div>`;
+    return `<a class="news-card" href="${a.url}" target="_blank" rel="noopener">
+      ${img}
+      <div class="news-body">
+        <div class="news-source">${a.fonte||''}</div>
+        <div class="news-title">${a.titolo||''}</div>
+        ${a.desc?`<div class="news-desc">${a.desc}</div>`:''}
+        <div class="news-date">${formatDate(a.data)}</div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+const NEWS_API_KEY = '7a29c81fae344d108e905de748efe5df';
+const NEWS_QUERIES = ['musica italiana','Sanremo','cantautori italiani','concerti italia','disco vinile italia'];
+
+async function initNews() {
+  const grid = document.getElementById('newsGrid');
+  const banner = document.getElementById('newsOfflineBanner');
+
+  // Se online, carica notizie fresche da NewsAPI
+  if (navigator.onLine) {
+    grid.innerHTML = `<div class="news-status">⏳ Caricamento notizie in tempo reale…</div>`;
+    try {
+      let tutti = [];
+      for (const q of NEWS_QUERIES) {
+        const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&language=it&sortBy=publishedAt&pageSize=10&apiKey=${NEWS_API_KEY}`;
+        const r = await fetch(url);
+        if (!r.ok) continue;
+        const data = await r.json();
+        (data.articles || []).forEach(a => {
+          if (!tutti.find(x => x.url === a.url) && a.title && a.url) {
+            tutti.push({
+              titolo: a.title,
+              fonte: a.source?.name || '',
+              url: a.url,
+              data: a.publishedAt,
+              immagine: a.urlToImage || '',
+              sommario: a.description || ''
+            });
+          }
+        });
+      }
+      tutti.sort((a, b) => new Date(b.data) - new Date(a.data));
+      if (tutti.length) {
+        renderNews(tutti);
+        if (banner) banner.innerHTML = `<div class="news-offline" style="background:#E8F4EA;border-color:#2A8A4A;color:#1A5A2A">
+          📡 Notizie in tempo reale · aggiornate ora
+        </div>`;
+        return;
+      }
+    } catch(e) {
+      console.warn('NewsAPI error:', e);
+    }
+  }
+
+  // Fallback: dati offline incorporati
+  if (!Object.keys(NEWS_DATA).length || !Object.keys(NEWS_DATA).filter(k=>k!=='_aggiornate').length) {
+    grid.innerHTML = `<div class="news-status">
+      📭 Nessuna notizia disponibile.<br>
+      <small style="font-size:.85rem;margin-top:8px;display:block">
+        Connettiti a internet per le notizie in tempo reale,<br>
+        oppure esegui <strong>scraper_notizie.py</strong> poi <strong>incorpora_json.py</strong>.
+      </small>
+    </div>`;
+    return;
+  }
+
+  let tutti = [];
+  Object.entries(NEWS_DATA).forEach(([key, val]) => {
+    if (key === '_aggiornate') return;
+    const articoli = val.articoli || [];
+    articoli.forEach(a => { if (!tutti.find(x => x.url === a.url)) tutti.push(a); });
+  });
+  tutti.sort((a, b) => new Date(b.data) - new Date(a.data));
+  renderNews(tutti);
+
+  const aggiornate = NEWS_DATA._aggiornate;
+  if (aggiornate && banner) {
+    banner.innerHTML = `<div class="news-offline">
+      📡 Notizie offline del <strong>${formatDate(aggiornate)}</strong> —
+      connettiti a internet per le notizie fresche.
+    </div>`;
+  }
+}
+
+
+// ── ARTISTI ──────────────────────────────────────────────────────────────────
+
+// Dati artisti caricati dal JSON (se disponibile) o lista minima di fallback
+let ARTISTI_DATA = [];
+
+function buildArtisti() {
+  // Filtri per categoria
+  const cats = ['tutti','cantante','cantautore','gruppo','paroliere','compositore'];
+  document.getElementById('artFiltRow').innerHTML = cats.map(c =>
+    `<button class="filt-btn ${c==='tutti'?'active':''}" onclick="setArtFilt('${c}',this)">${c==='tutti'?'Tutti':c.charAt(0).toUpperCase()+c.slice(1)+'i'}</button>`
+  ).join('');
+  drawArtisti();
+}
+
+let artFilt = 'tutti';
+function setArtFilt(f, btn) {
+  artFilt = f;
+  document.querySelectorAll('#artFiltRow .filt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  drawArtisti();
+}
+
+function drawArtisti() {
+  const s = (document.getElementById('artSrch')?.value || '').toLowerCase();
+  let lista = ARTISTI_DATA.length ? ARTISTI_DATA : buildFallbackArtisti();
+
+  lista = lista.filter(a => {
+    const matchCat  = artFilt === 'tutti' || a.categoria === artFilt;
+    const matchSrch = !s || a.nome.toLowerCase().includes(s) ||
+                      (a.bio_intro||'').toLowerCase().includes(s) ||
+                      (a.generi||[]).join(' ').toLowerCase().includes(s);
+    return matchCat && matchSrch;
+  });
+
+  // Ordine alfabetico
+  lista.sort((a,b) => a.nome.localeCompare(b.nome, 'it'));
+
+  document.getElementById('artGrid').innerHTML = lista.map(a => cardArtista(a)).join('');
+}
+
+function cardArtista(a) {
+  // Foto: priorità base64 > URL Spotify > placeholder
+  const fotoSrc = (a.foto && a.foto.startsWith('data:')) ? a.foto
+                : (a.foto_spotify_url || a.spotify_foto) ? (a.foto_spotify_url || a.spotify_foto)
+                : null;
+  const fotoHtml = fotoSrc
+    ? `<img class="art-foto" src="${fotoSrc}" alt="${a.nome}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    + `<div class="art-foto-placeholder" style="display:none">🎵</div>`
+    : `<div class="art-foto-placeholder">🎵</div>`;
+
+  const decenni = (a.decenni||[]).map(d => `<span class="art-decade-tag">anni ${d}</span>`).join('');
+  const generi  = (a.generi||[]).slice(0,3).map(g => `<span class="art-genre-tag">${g}</span>`).join('');
+
+  // Usa lastfm_top_tracks se disponibili, poi spotify, poi discografia MusicBrainz
+  const tracks = (a.lastfm_top_tracks||a.spotify_top_tracks||[]).slice(0,3);
+  const disc   = (a.discografia||[]).slice(0,3);
+  const isLastfm = !!(a.lastfm_top_tracks && a.lastfm_top_tracks.length);
+
+  let discHtml = '';
+  if (tracks.length) {
+    const label = isLastfm ? '🎵 Brani più ascoltati (Last.fm)' : '🎵 Top brani';
+    discHtml = `<div class="art-disc-title">${label}</div>
+      <ul class="art-disc-list">${tracks.map(t =>
+        `<li class="art-disc-item">
+          <span>${t.titolo}</span>
+          <span style="display:flex;gap:6px;align-items:center">
+            ${t.anteprima ? '<span style="color:var(--green);font-size:.8rem">▶</span>' : ''}
+            ${t.ascolti ? `<span class="art-disc-year" style="font-size:.65rem">${(t.ascolti/1000000).toFixed(1)}M</span>` : ''}
+            ${t.anno ? `<span class="art-disc-year">${t.anno}</span>` : ''}
+          </span>
+        </li>`).join('')}</ul>`;
+  } else if (disc.length) {
+    discHtml = `<div class="art-disc-title">Discografia selezionata</div>
+      <ul class="art-disc-list">${disc.map(d =>
+        `<li class="art-disc-item">
+          <span>${d.titolo}</span>
+          <span style="display:flex;gap:6px;align-items:center">
+            <span class="art-disc-tipo">${d.tipo||''}</span>
+            <span class="art-disc-year">${d.anno}</span>
+          </span>
+        </li>`).join('')}</ul>`;
+  } else {
+    discHtml = `<div class="art-no-disc">Esegui <em>scraper_lastfm.py</em> per i brani.</div>`;
+  }
+
+  const pop = a.spotify_popolarita
+    ? `<span style="font-family:'Josefin Sans',sans-serif;font-size:.65rem;color:var(--text-l);letter-spacing:1px">⭐ ${a.spotify_popolarita}/100</span>`
+    : '';
+
+  const idSafe = JSON.stringify(a.nome).replace(/"/g,'&quot;');
+  return `<div class="art-card" onclick="openModal(${idSafe})">
+    <div class="art-card-top">
+      ${fotoHtml}
+      <div class="art-card-info">
+        <div class="art-card-name">${a.nome}</div>
+        <div class="art-card-cat">${a.categoria||''}</div>
+        <div class="art-card-decades">${decenni}</div>
+        ${pop}
+      </div>
+    </div>
+    <div class="art-card-body">
+      ${generi ? `<div class="art-genres">${generi}</div>` : ''}
+      <div class="art-bio">${a.bio_intro || 'Biografia non disponibile.'}</div>
+      ${discHtml}
+    </div>
+  </div>`;
+}
+
+function openModal(nome) {
+  const a = (ARTISTI_DATA.length ? ARTISTI_DATA : buildFallbackArtisti()).find(x => x.nome === nome);
+  if (!a) return;
+
+  const fotoHtml = a.foto
+    ? `<img class="art-modal-foto" src="${a.foto}" alt="${a.nome}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+       <div class="art-modal-foto-ph" style="display:none">🎵</div>`
+    : `<div class="art-modal-foto-ph">🎵</div>`;
+
+  const nasc  = a.nascita  ? `Nato/a nel ${a.nascita.anno}${a.nascita.giorno ? ` (${a.nascita.giorno}/${a.nascita.mese}/${a.nascita.anno})` : ''}` : '';
+  const morte = a.morte    ? ` · Scomparso/a nel ${a.morte.anno}` : '';
+  const eta   = nasc ? `<div style="font-size:.85rem;color:var(--text-l);margin-top:4px">${nasc}${morte}</div>` : '';
+
+  const generi = (a.generi||[]).map(g=>`<span class="art-genre-tag">${g}</span>`).join('');
+
+  const disc = (a.discografia||[]);
+  const discHtml = disc.length
+    ? `<div class="disc-full">${disc.map(d =>
+        `<div class="disc-item-full">
+          <div class="dy">${d.anno}</div>
+          <div class="dt">${d.titolo}</div>
+          <div class="dtp">${d.tipo||'Release'}</div>
+        </div>`).join('')}</div>`
+    : `<div class="art-no-disc">Esegui <strong>scraper_musicbrainz.py</strong> per scaricare la discografia completa da MusicBrainz.</div>`;
+
+  const collab = (a.collaborazioni||[]).slice(0,5);
+  const collabHtml = collab.length
+    ? collab.map(c=>`<span class="art-genre-tag" style="background:#F8EEE8;color:#7D1B1B">${c.con}</span>`).join('')
+    : '<em style="font-size:.85rem;color:var(--text-l)">Nessuna collaborazione rilevata</em>';
+
+  document.getElementById('artModalBox').innerHTML = `
+    <div class="art-modal-header">
+      ${fotoHtml}
+      <div class="art-modal-hinfo">
+        <div class="art-modal-name">${a.nome}</div>
+        <div class="art-modal-cat">${(a.categoria||'').toUpperCase()} · ${(a.decenni||[]).map(d=>'anni '+d).join(', ')}</div>
+        ${eta}
+        ${a.etichetta ? `<div style="font-size:.82rem;color:var(--text-l);margin-top:6px">🏷 ${a.etichetta}</div>` : ''}
+        ${generi ? `<div class="art-genres" style="margin-top:8px">${generi}</div>` : ''}
+      </div>
+      <button class="art-modal-close" onclick="document.getElementById('artModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="art-modal-body">
+      <div class="art-modal-section">
+        <div class="art-modal-section-title">📖 Biografia</div>
+        <div class="art-modal-bio">${a.bio_intro || 'Biografia non disponibile. Esegui lo scraper per scaricare i dati da Wikipedia.'}</div>
+        ${a.wiki_url ? `<a href="${a.wiki_url}" target="_blank" style="font-size:.8rem;color:var(--burgundy);font-family:'Josefin Sans',sans-serif;letter-spacing:1px">→ Leggi su Wikipedia</a>` : ''}
+      </div>
+      <div class="art-modal-section">
+        <div class="art-modal-section-title">💿 Discografia</div>
+        ${discHtml}
+      </div>
+      ${a.top_tracks && a.top_tracks.length ? `
+      <div class="art-modal-section">
+        <div class="art-modal-section-title"><span class="sp-badge">♫ Spotify</span> &nbsp;Top Brani</div>
+        ${spTracksHtml(a)}
+      </div>` : ''}
+      <div class="art-modal-section">
+        <div class="art-modal-section-title">🤝 Collaborazioni rilevate</div>
+        <div class="art-genres">${collabHtml}</div>
+      </div>
+    </div>`;
+
+  document.getElementById('artModal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target.id === 'artModal') document.getElementById('artModal').classList.remove('open');
+}
+
+function buildFallbackArtisti() {
+  // Lista minima di fallback se il JSON non è stato caricato
+  return [
+    {nome:'Lucio Battisti',categoria:'cantautore',decenni:["'60","'70","'80"],bio_intro:'Cantautore italiano tra i più influenti del Novecento. In coppia con il paroliere Mogol, rivoluzionò la canzone italiana.',generi:['Pop','Rock'],discografia:[],collaborazioni:[]},
+    {nome:'Fabrizio De André',categoria:'cantautore',decenni:["'60","'70","'80","'90"],bio_intro:'Cantautore genovese, poeta della canzone italiana. Autore di capolavori come "La guerra di Piero" e "Via del Campo".',generi:['Folk','Cantautorato'],discografia:[],collaborazioni:[]},
+    {nome:'Mina',categoria:'cantante',decenni:["'60","'70","'80","'90"],bio_intro:'Considerata la più grande interprete della canzone italiana del Novecento. Voce di tre ottave. Dal 1978 non si esibisce più dal vivo.',generi:['Pop','Jazz'],discografia:[],collaborazioni:[]},
+  ];
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function init() {
+  // Tenta di caricare dati_musicali.json (funziona con python -m http.server)
+  try {
+    const r = await fetch('dati_musicali.json');
+    if (r.ok) {
+      const dati = await r.json();
+      if (dati.artisti && dati.artisti.length) {
+        ARTISTI_DATA = dati.artisti;
+        console.log(`✅ Caricati ${ARTISTI_DATA.length} artisti da dati_musicali.json`);
+      }
+      // Arricchisci eventi OTD
+      if (dati.eventi_otd) {
+        const visti = new Set(EVENTS.map(e=>e.y+'_'+e.desc));
+        dati.eventi_otd.forEach(e => {
+          if (e.giorno && e.mese) {
+            const k = e.anno+'_'+e.desc;
+            if (!visti.has(k)) { EVENTS.push({d:e.giorno,m:e.mese,y:e.anno,t:e.tipo,desc:e.desc,det:e.det||''}); visti.add(k); }
+          }
+        });
+      }
+      // Arricchisci curiosità
+      if (dati.curiosita) {
+        dati.curiosita.forEach(c => CURIOSITA.push({a:c.artista,d:c.decennio,tag:c.tag,txt:c.testo}));
+      }
+    }
+  } catch(e) {
+    console.log('dati_musicali.json non trovato, uso dati di esempio');
+  }
+  buildOTD();
+  buildCuriosity();
+  buildArtisti();
+  nextQ();
+}
+init();
+</script>
+</body>
+</html>
